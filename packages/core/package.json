@@ -4,6 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "echo \"no tests yet\" && exit 0"
+    "test": "vitest run"
   }
 }
