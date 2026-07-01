@@ -1,0 +1,12 @@
+{
+  "name": "@job-tracker/infrastructure",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@job-tracker/core": "workspace:*"
+  },
+  "scripts": {
+    "test": "echo \"no tests yet\" && exit 0"
+  }
+}

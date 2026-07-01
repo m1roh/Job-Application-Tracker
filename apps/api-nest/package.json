@@ -1,0 +1,13 @@
+{
+  "name": "@job-tracker/api-nest",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@job-tracker/core": "workspace:*",
+    "@job-tracker/infrastructure": "workspace:*"
+  },
+  "scripts": {
+    "test": "echo \"no tests yet\" && exit 0"
+  }
+}
