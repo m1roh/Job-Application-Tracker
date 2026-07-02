@@ -7,6 +7,6 @@
     "@job-tracker/core": "workspace:*"
   },
   "scripts": {
-    "test": "echo \"no tests yet\" && exit 0"
+    "test": "vitest run"
   }
 }
