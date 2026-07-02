@@ -4,9 +4,13 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@job-tracker/core": "workspace:*"
+    "@job-tracker/core": "workspace:*",
+    "mongodb": "^7.4.0"
   },
   "scripts": {
     "test": "vitest run"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.2.0"
   }
 }

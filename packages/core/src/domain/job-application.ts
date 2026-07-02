@@ -46,6 +46,8 @@ type JobApplicationProps = {
   history: StatusChange[];
 };
 
+export type JobApplicationSnapshot = JobApplicationProps;
+
 export class JobApplication {
   private constructor(private readonly props: JobApplicationProps) {}
 
@@ -80,6 +82,10 @@ export class JobApplication {
       notes: params.notes ?? "",
       history: [],
     });
+  }
+
+  static reconstitute(snapshot: JobApplicationSnapshot): JobApplication {
+    return new JobApplication(snapshot);
   }
 
   private allowedDestinations(): ApplicationStatus[] {

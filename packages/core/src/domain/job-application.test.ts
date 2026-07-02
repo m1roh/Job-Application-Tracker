@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { JobApplication, type ApplicationStatus } from "./job-application.js";
+import { JobApplication, type ApplicationStatus, type JobApplicationSnapshot } from "./job-application.js";
 import { CompanyName } from "./value-objects/company-name.js";
 import { JobApplicationId } from "./value-objects/job-application-id.js";
 
@@ -214,6 +214,30 @@ describe("JobApplication", () => {
       const b = JobApplication.create(createParams(), NOW);
 
       expect(a.equals(b)).toBe(false);
+    });
+  });
+
+  describe("reconstitute", () => {
+    it("rebuilds a JobApplication exposing exactly the given snapshot, without re-validating it", () => {
+      const snapshot: JobApplicationSnapshot = {
+        id: JobApplicationId.generate(),
+        company: CompanyName.from("Acme Corp"),
+        position: "Backend Engineer",
+        status: "hr_interview",
+        applicationDate: new Date("2026-06-01T00:00:00.000Z"),
+        nextFollowUp: null,
+        offerUrl: null,
+        notes: "",
+        history: [
+          { previousStatus: "to_contact", newStatus: "application_sent", date: new Date("2026-06-01T00:00:00.000Z") },
+          { previousStatus: "application_sent", newStatus: "hr_interview", date: new Date("2026-06-05T00:00:00.000Z") },
+        ],
+      };
+
+      const application = JobApplication.reconstitute(snapshot);
+
+      expect(application.status).toBe("hr_interview");
+      expect(application.history).toEqual(snapshot.history);
     });
   });
 });
