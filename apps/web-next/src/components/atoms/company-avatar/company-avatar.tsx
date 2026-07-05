@@ -5,10 +5,19 @@ export type CompanyAvatarProps = {
   backgroundColor: string;
   textColor: string;
   shape?: "square" | "circle";
+  size?: "sm" | "lg";
 };
 
-export function CompanyAvatar({ initials, backgroundColor, textColor, shape = "square" }: CompanyAvatarProps) {
-  const classes = [styles.avatar, shape === "circle" ? styles.circle : undefined].filter(Boolean).join(" ");
+export function CompanyAvatar({
+  initials,
+  backgroundColor,
+  textColor,
+  shape = "square",
+  size = "sm",
+}: CompanyAvatarProps) {
+  const classes = [styles.avatar, size === "lg" ? styles.lg : undefined, shape === "circle" ? styles.circle : undefined]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div className={classes} style={{ backgroundColor, color: textColor }}>

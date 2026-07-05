@@ -47,3 +47,16 @@ export const Circle: Story = {
     await expect(canvas.getByText("YM")).toHaveStyle({ borderRadius: "50%" });
   },
 };
+
+export const Large: Story = {
+  args: {
+    initials: "NT",
+    size: "lg",
+    backgroundColor: statusColors.application_sent.bg,
+    textColor: statusColors.application_sent.text,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText("NT")).toHaveStyle({ width: "48px", height: "48px" });
+  },
+};
