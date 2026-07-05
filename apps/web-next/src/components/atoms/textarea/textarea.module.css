@@ -1,0 +1,24 @@
+.textarea {
+  min-height: 96px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--radius-input);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: 15px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.textarea:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+.textarea:disabled {
+  cursor: not-allowed;
+  color: var(--color-text-disabled);
+  background: var(--color-background-disabled);
+  border-color: transparent;
+  resize: none;
+}
