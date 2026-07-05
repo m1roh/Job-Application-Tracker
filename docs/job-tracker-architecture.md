@@ -24,6 +24,8 @@
 | Design tokens | Package partagé `packages/design-tokens` (JSON/CSS custom properties) | Couleurs, espacements, typographie — partagés entre Next.js et Angular. Ce sont des données, pas du code framework-spécifique, donc ça respecte la même logique que `packages/core` : ce qui peut être partagé sans dépendance à un framework l'est |
 | Documentation composants | Storybook, sur les deux apps | Développement isolé des atoms/molecules/organisms, indépendamment des pages ; catalogue visuel réutilisable pour du contenu LinkedIn |
 | Tests frontend | Storybook Test (`@storybook/addon-vitest`) — les stories deviennent des tests Vitest exécutables | Une story avec une fonction `play` sert à la fois de documentation visuelle et de test d'interaction — pas de duplication entre Storybook et une suite de tests séparée. Fonctionne pareil sur React et Angular (via `@analogjs/storybook-angular` côté Angular) |
+| Accessibilité | `@storybook/addon-a11y` (axe-core, WCAG) | S'intègre nativement à l'addon Vitest déjà choisi — les vérifications a11y tournent dans les mêmes tests que les stories, pas d'outil séparé. Détecte automatiquement ~57% des problèmes WCAG (contraste, rôles ARIA manquants, etc.) |
+| Documentation frontend | Storybook Autodocs + MDX | Doc générée automatiquement depuis les stories (props, variantes) pour chaque atom/molecule/organism, complétée par des pages MDX pour les guidelines transverses (principes d'accessibilité, règles d'usage du design system) |
 
 **Note sur le driver MongoDB natif** : sans ODM, c'est à l'adapter (`candidature-repository.mongodb.ts`) de faire la conversion explicite entre l'entité `Candidature` du domaine et le document MongoDB stocké. Un peu plus de code à écrire au début, mais aucune fuite d'un concept d'infrastructure vers le domaine — et comme cet adapter est partagé entre Next.js et NestJS, tu ne l'écris qu'une seule fois.
 
@@ -325,6 +327,14 @@ L'ordre compte doublement ici : d'abord pour rester en contrôle, ensuite pour �
 - **Ce qui n'est pas un composant visuel** (Server Actions Next.js, service HTTP Angular `candidatures-api.service.ts`) — tests Vitest classiques, avec les use cases ou l'API mockés, comme n'importe quelle fonction. Storybook ne s'applique pas ici, ce n'est pas de l'UI
 - **End-to-end (Playwright)** — volontairement hors scope du MVP. Un ou deux parcours critiques (créer une candidature de bout en bout) pourraient s'ajouter plus tard, mais avec le planning déjà chargé (recherche d'emploi, formation, OpenTiko), ce n'est pas une priorité tant que les tests composants et domaine couvrent l'essentiel
 
+**Accessibilité — vérifiée au même niveau que les tests, pas après coup**
+
+Chaque story (atom/molecule/organism) est automatiquement vérifiée par `@storybook/addon-a11y` (axe-core) au moment où elle tourne comme test Vitest — même mécanisme que les tests d'interaction, pas un audit séparé fait à la fin. Progression recommandée : démarrer avec `parameters.a11y.test = 'todo'` (les violations s'affichent sans faire échouer la CI), puis basculer composant par composant vers `'error'` une fois corrigé — plutôt que d'activer `'error'` partout d'un coup et bloquer toute la CI dès le premier atom.
+
+**Documentation frontend — intégrée à Storybook, pas un document séparé**
+
+Chaque atom/molecule/organism génère sa page de doc automatiquement (Autodocs) à partir de sa story et de ses `argTypes` — props, variantes, exemples. Les guidelines transverses (principes d'accessibilité du projet, règles d'usage du design system, contraintes de la section 12) vivent dans des pages MDX dédiées, consultables au même endroit. Ça évite un doc frontend qui vieillit mal en étant déconnecté du code réel — la doc et le composant sont mis à jour ensemble, dans le même commit.
+
 Ne commence jamais la phase B avant que la phase A soit complète et testée. C'est le seul moyen de vraiment vérifier que le domaine est réutilisable tel quel.
 
 À chaque étape : test rouge → code minimal pour passer au vert → refactor si besoin, avant de passer à l'étape suivante.
@@ -431,6 +441,91 @@ Pas d'authentification, pas de gestion de rôles — hors scope MVP (décidé en
 ---
 
 **Conseil supplémentaire pour ce monorepo** : garde un `CLAUDE.md` à la racine qui rappelle la règle du point clé de la section 6 (Angular n'importe jamais `packages/core` directement) — c'est le genre de règle qu'il vaut mieux répéter explicitement à chaque session plutôt que d'espérer que Claude Code la déduise seul.
+
+---
+
+## 13. CI/CD — GitHub Actions
+
+### Architecture générale
+
+Deux workflows séparés, avec des runners différents et des déclencheurs différents — c'est la décision de sécurité la plus importante de cette section.
+
+| Workflow | Déclencheur | Runner | Rôle |
+|---|---|---|---|
+| `ci.yml` | `push` (toutes branches) + `pull_request` vers `main` | GitHub-hosted (`ubuntu-latest`) | Lint, format, typecheck, tests, build |
+| `deploy.yml` | `push` sur `main` uniquement | **Self-hosted** (home server) | Build des images Docker et déploiement |
+
+**Règle de sécurité non négociable** : le runner self-hosted ne se déclenche jamais sur `pull_request`. Un repo public avec un runner self-hosted exposé aux PR permettrait à n'importe qui d'exécuter du code sur le réseau domestique via une PR malveillante. Le déploiement se déclenche uniquement après un `push` direct sur `main` — donc après qu'une PR a déjà été relue et mergée par toi.
+
+### CI (`ci.yml`) — sur GitHub-hosted runners
+
+1. Checkout + setup pnpm avec cache
+2. `pnpm install --frozen-lockfile`
+3. Lint : `pnpm -r lint` (ESLint)
+4. Format : `pnpm -r format:check` (Prettier, échoue si non formaté)
+5. Typecheck : `pnpm -r typecheck` (`tsc --noEmit` par package)
+6. Tests : `pnpm -r test` — fonctionne dès maintenant grâce aux scripts placeholder (`echo "no tests yet" && exit 0`), se remplit automatiquement à mesure que les vrais tests s'ajoutent en TDD
+7. Audit sécurité : `pnpm audit --audit-level=high` (cf. section 10)
+8. Build : `pnpm -r build` (une fois les scripts de build réels en place, à partir de la Phase B)
+
+### CD (`deploy.yml`) — sur le runner self-hosted
+
+1. Checkout
+2. `docker compose build` — les Dockerfiles de chaque app vivent dans leur dossier (`apps/web-next/Dockerfile`, etc.)
+3. `docker compose up -d` — redémarre les conteneurs avec les nouvelles images
+
+Pas besoin de registre d'images (ghcr.io) : le runner tourne déjà sur la machine cible, construire et déployer sont la même étape.
+
+### Installer le runner self-hosted
+
+Dans GitHub : **Settings → Actions → Runners → New self-hosted runner**, suivre les instructions pour ton OS. Le runner s'installe comme un service qui interroge GitHub en continu (sortant uniquement — aucun port entrant à ouvrir pour ça).
+
+### Architecture réseau du home server
+
+```
+Internet
+   │
+   ▼
+Routeur (port forward 443 → Caddy uniquement)
+   │
+   ▼
+Caddy (reverse proxy, TLS automatique via Let's Encrypt)
+   │
+   ├──► web-next (conteneur, port interne uniquement)
+   ├──► api-nest (conteneur, port interne uniquement)
+   ├──► web-angular (conteneur, fichiers statiques, port interne uniquement)
+   └──► MongoDB (conteneur, JAMAIS exposé au routeur, réseau Docker interne uniquement)
+```
+
+**Règles de sécurité pour l'exposition publique (prolongement direct de la section 10) :**
+- Seul le port 443 (HTTPS) est redirigé sur le routeur — vers Caddy, rien d'autre
+- MongoDB reste sur le réseau Docker interne, jamais accessible depuis l'extérieur, même indirectement
+- Caddy gère la terminaison TLS automatiquement (certificat Let's Encrypt, renouvellement automatique)
+- Un nom de domaine est nécessaire — si ton IP publique change (pas d'IP fixe chez la plupart des FAI grand public), un service de DNS dynamique (Cloudflare + un client DDNS, ou DuckDNS) est nécessaire pour que le domaine pointe toujours vers ta box
+- Optionnel mais recommandé : passer par Cloudflare en mode proxy (masque ton IP domestique réelle, ajoute une protection anti-DDoS de base)
+
+### Ce qui reste à faire de ton côté avant que `deploy.yml` fonctionne
+
+- Un nom de domaine (ou sous-domaine) pointant vers ton IP publique
+- Le port 443 redirigé sur ton routeur vers le home server
+- Le runner self-hosted installé et actif
+- Les `Dockerfile` de chaque app (à écrire en Phase B, une fois le code des apps réel — pas avant)
+
+### Hors scope pour l'instant
+
+Path-filtering / exécution sélective par package (ex. Turborepo avec cache distant) — prématuré à 5 packages, à reconsidérer si le monorepo grossit significativement et que la CI devient lente. Lighthouse CI et k6 (section 9) s'ajoutent après la Phase B, pas dans cette première mise en place.
+
+### Étape ultérieure — migration vers MicroK8s
+
+Décidé mais volontairement **séquencé après** un premier déploiement fonctionnel via Docker Compose, pour deux raisons : obtenir quelque chose qui marche rapidement plutôt que de risquer de bloquer sur la complexité K8s dès le départ, et transformer la migration elle-même en exercice d'apprentissage délibéré et documenté (bon sujet d'article : "de Docker Compose à Kubernetes sur mon home server — ce qui a changé et pourquoi"). Motivation : Kubernetes est une compétence fréquemment demandée pour des postes seniors, et ça recoupe directement la formation Systèmes/Réseaux/Cybersécurité en cours.
+
+**Ce qui migre vers MicroK8s** : `web-next`, `api-nest`, `web-angular` — trois apps stateless, terrain idéal pour apprendre Deployments, Services, Ingress, rolling updates et scaling sans risque sur des données réelles.
+
+**Ce qui reste hors du cluster (décision prise maintenant)** : MongoDB reste en simple conteneur Docker, à côté du cluster, pas en StatefulSet. Sur un MicroK8s mono-nœud, un volume persistant K8s n'est jamais qu'un `hostPath` sur le même disque physique — la complexité d'un StatefulSet n'apporte pas encore le vrai bénéfice (réplication, haute disponibilité multi-nœud) qui la justifierait. Faire tourner des données réelles (ton propre suivi de candidatures) dans un cluster encore en cours d'apprentissage serait un risque évitable. Le passage de MongoDB en StatefulSet devient un exercice à part entière, plus tard, idéalement avec des données de test.
+
+**Ce que ça change dans l'architecture réseau** : l'Ingress Controller de MicroK8s (addon `ingress`, basé sur nginx) remplace le rôle de Caddy pour le routage vers les apps ; `cert-manager` (addon MicroK8s) reprend la gestion automatique des certificats Let's Encrypt à la place de la gestion native de Caddy. MongoDB, en dehors du cluster, continue d'être joint depuis `api-nest` via le réseau Docker/hôte, jamais exposé publiquement — la règle de la section 10 ne change pas.
+
+**Pas de Helm ni de GitOps (ArgoCD/Flux) pour cette première migration** — des manifests YAML simples (Deployment/Service/Ingress par app) suffisent pour apprendre les concepts de base. Package manager K8s et déploiement continu déclaratif sont de bons candidats pour une itération suivante, une fois le cluster manuel maîtrisé.
 
 ---
 

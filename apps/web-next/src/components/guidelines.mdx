@@ -1,0 +1,20 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Guidelines" />
+
+# Guidelines transverses
+
+Ces règles s'appliquent à tout atom/molecule/organism du design system, en complément de la doc générée automatiquement (Autodocs) sur chaque composant. Voir `docs/job-tracker-architecture.md` (section 12) pour le catalogue complet et les tokens de référence.
+
+## Accessibilité
+
+- Chaque story est vérifiée automatiquement par `@storybook/addon-a11y` (axe-core) au moment où elle tourne comme test Vitest — ce n'est pas un audit séparé.
+- Progression : un composant démarre avec `parameters.a11y.test = 'todo'` (violations visibles, CI non bloquée), puis passe à `'error'` une fois corrigé. Ne jamais activer `'error'` partout d'un coup.
+- Toujours associer un `<label>` (ou `aria-label`) explicite à chaque champ de formulaire, select ou bouton icône seul.
+- Les boutons/contrôles avec un état actif (toggle, filtre) doivent exposer cet état via `aria-pressed`/`aria-selected`/`aria-invalid` **et** un style visuellement distinct — l'un sans l'autre est insuffisant.
+
+## Design system — règles d'usage
+
+- Les valeurs de tokens (couleurs, rayons, hauteurs, typographie) viennent toujours de `packages/design-tokens`, jamais codées en dur dans un composant.
+- Respecter exactement la nomenclature et la hiérarchie atomic design du catalogue (section 12.02 à 12.05) — pas de composant inventé sans validation explicite.
+- Un atom/molecule/organism est développé en TDD strict : la story (avec sa fonction `play`) s'écrit avant le composant, pas après.
