@@ -1,0 +1,20 @@
+.container {
+  padding: 32px;
+  border-radius: var(--radius-card);
+  border: 1px dashed var(--color-input-border);
+  text-align: center;
+  max-width: 420px;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 6px;
+}
+
+.description {
+  font-size: 13px;
+  color: var(--color-text-caption);
+  margin-bottom: 14px;
+}
