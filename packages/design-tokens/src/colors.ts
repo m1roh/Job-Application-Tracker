@@ -35,6 +35,9 @@ export const neutralColors = {
   backgroundHover: "oklch(95% .003 250)",
   accent: "oklch(52% .17 262)",
   accentHover: "oklch(46% .17 262)",
+  // Fond/bordure teintés pour signaler un filtre actif (même teinte 262 que accent) — cf. doc section 09.
+  accentSurface: "oklch(93% .035 262)",
+  accentSurfaceBorder: "oklch(85% .05 262)",
   // Bouton destructif : même L/C que accent/accentHover, teinte 25 (famille du statut `rejected`) — cf. doc section 12.
   destructive: "oklch(52% .17 25)",
   destructiveHover: "oklch(46% .17 25)",

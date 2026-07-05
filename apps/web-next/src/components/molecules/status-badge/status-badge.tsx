@@ -1,7 +1,7 @@
 import { statusColors, type StatusKey } from "@job-tracker/design-tokens";
 import { Badge } from "../../atoms/badge/badge";
 
-const statusLabels: Record<StatusKey, string> = {
+export const statusLabels: Record<StatusKey, string> = {
   to_contact: "À contacter",
   offer_open: "Offre ouverte",
   application_sent: "Candidature envoyée",
