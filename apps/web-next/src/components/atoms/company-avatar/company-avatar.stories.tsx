@@ -34,3 +34,16 @@ export const AnotherCompany: Story = {
     await expect(canvas.getByText("OR")).toBeInTheDocument();
   },
 };
+
+export const Circle: Story = {
+  args: {
+    initials: "YM",
+    shape: "circle",
+    backgroundColor: statusColors.hr_interview.bg,
+    textColor: statusColors.hr_interview.text,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText("YM")).toHaveStyle({ borderRadius: "50%" });
+  },
+};
