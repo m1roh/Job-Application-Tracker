@@ -2,6 +2,9 @@ node_modules/
 dist/
 build/
 coverage/
+.next/
+storybook-static/
+*.tsbuildinfo
 
 .env
 .env.*

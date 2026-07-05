@@ -1,0 +1,74 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  color: var(--color-text-disabled);
+  background: var(--color-background-disabled);
+  border-color: transparent;
+}
+
+.standard {
+  height: var(--control-height-button);
+  padding-inline: var(--control-padding-inline-button);
+  border-radius: var(--radius-button);
+}
+
+.small {
+  height: var(--control-height-button-small);
+  padding-inline: var(--control-padding-inline-button-small);
+  border-radius: var(--radius-button-small);
+}
+
+.icon {
+  height: var(--control-height-button-icon);
+  width: var(--control-height-button-icon);
+  padding-inline: 0;
+  border-radius: var(--radius-button);
+}
+
+.primary {
+  background: var(--color-accent);
+  color: white;
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+}
+
+.secondary {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.secondary:hover:not(:disabled) {
+  background: var(--color-background-hover);
+}
+
+.tertiary {
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.tertiary:hover:not(:disabled) {
+  background: var(--color-background-hover);
+}
+
+.destructive {
+  background: var(--color-destructive);
+  color: white;
+}
+
+.destructive:hover:not(:disabled) {
+  background: var(--color-destructive-hover);
+}
