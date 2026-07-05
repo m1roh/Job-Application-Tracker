@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, within } from "storybook/test";
-import { StatutBadge } from "./statut-badge";
+import { StatusBadge } from "./status-badge";
 
-const meta: Meta<typeof StatutBadge> = {
-  title: "Molecules/StatutBadge",
-  component: StatutBadge,
+const meta: Meta<typeof StatusBadge> = {
+  title: "Molecules/StatusBadge",
+  component: StatusBadge,
 };
 
 export default meta;
-type Story = StoryObj<typeof StatutBadge>;
+type Story = StoryObj<typeof StatusBadge>;
 
 export const ToContact: Story = {
   args: { status: "to_contact" },

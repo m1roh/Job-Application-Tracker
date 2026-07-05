@@ -14,11 +14,11 @@ const statusLabels: Record<StatusKey, string> = {
   withdrawn: "Abandonné",
 };
 
-export type StatutBadgeProps = {
+export type StatusBadgeProps = {
   status: StatusKey;
 };
 
-export function StatutBadge({ status }: StatutBadgeProps) {
+export function StatusBadge({ status }: StatusBadgeProps) {
   const tokens = statusColors[status];
 
   return (
