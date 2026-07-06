@@ -1,6 +1,6 @@
 import type { ApplicationStatus, JobApplication } from "@job-tracker/core/domain/job-application.js";
-import type { StatItem } from "../../components/templates/dashboard/dashboard-template.js";
-import { statusLabels } from "../../components/molecules/status-badge/status-badge.js";
+import type { StatItem } from "../../components/templates/dashboard/dashboard-template";
+import { statusLabels } from "../../components/molecules/status-badge/status-badge";
 
 const KNOWN_STATUSES = new Set(Object.keys(statusLabels));
 const NOT_ACTIVE: ApplicationStatus[] = ["rejected", "withdrawn", "offer_received"];

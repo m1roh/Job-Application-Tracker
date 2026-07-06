@@ -1,8 +1,8 @@
 import type { ApplicationStatus, JobApplication } from "@job-tracker/core/domain/job-application.js";
 import type { StatusKey } from "@job-tracker/design-tokens";
-import type { KanbanApplication } from "../../components/organisms/kanban-board/kanban-board.js";
-import { formatDate } from "./format-date.js";
-import { getInitials } from "./get-initials.js";
+import type { KanbanApplication } from "../../components/organisms/kanban-board/kanban-board";
+import { formatDate } from "./format-date";
+import { getInitials } from "./get-initials";
 
 const STATUS_VERBS: Partial<Record<ApplicationStatus, string>> = {
   application_sent: "Envoyée le",

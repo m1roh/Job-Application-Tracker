@@ -1,6 +1,6 @@
 import type { StatusKey } from "@job-tracker/design-tokens";
-import type { KanbanApplication } from "../../components/organisms/kanban-board/kanban-board.js";
-import type { SortOrder } from "../../components/molecules/search-and-filters/search-and-filters.js";
+import type { KanbanApplication } from "../../components/organisms/kanban-board/kanban-board";
+import type { SortOrder } from "../../components/molecules/search-and-filters/search-and-filters";
 
 export type DashboardFilters = {
   searchValue: string;
