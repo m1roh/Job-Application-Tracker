@@ -65,6 +65,19 @@ describe("toKanbanApplication", () => {
     expect(result.status).toBe("to_contact");
   });
 
+  it("has no sortDate for to_contact", () => {
+    const application = buildApplication({ status: "to_contact" });
+    expect(toKanbanApplication(application).sortDate).toBeNull();
+  });
+
+  it("sets sortDate to the same raw date used to build the dateLabel", () => {
+    const application = buildApplication({
+      status: "application_sent",
+      applicationDate: new Date("2026-06-12T10:00:00.000Z"),
+    });
+    expect(toKanbanApplication(application).sortDate).toEqual(new Date("2026-06-12T10:00:00.000Z"));
+  });
+
   it("labels application_sent with the applicationDate", () => {
     const application = buildApplication({
       status: "application_sent",

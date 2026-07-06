@@ -1,7 +1,6 @@
-import type { JobApplication } from "@job-tracker/core/domain/job-application.js";
 import type { StatusKey } from "@job-tracker/design-tokens";
+import type { KanbanApplication } from "../../components/organisms/kanban-board/kanban-board.js";
 import type { SortOrder } from "../../components/molecules/search-and-filters/search-and-filters.js";
-import { getActivityDate } from "./to-kanban-application.js";
 
 export type DashboardFilters = {
   searchValue: string;
@@ -10,19 +9,18 @@ export type DashboardFilters = {
   sortOrder: SortOrder;
 };
 
-function assertNoDuplicateIds(applications: JobApplication[]): void {
+function assertNoDuplicateIds(applications: KanbanApplication[]): void {
   const seenIds = new Set<string>();
 
   for (const application of applications) {
-    const id = application.id.toString();
-    if (seenIds.has(id)) {
-      throw new Error(`Invalid JobApplication list: duplicate id ${id}`);
+    if (seenIds.has(application.id)) {
+      throw new Error(`Invalid KanbanApplication list: duplicate id ${application.id}`);
     }
-    seenIds.add(id);
+    seenIds.add(application.id);
   }
 }
 
-function matchesFilters(application: JobApplication, filters: DashboardFilters, search: string): boolean {
+function matchesFilters(application: KanbanApplication, filters: DashboardFilters, search: string): boolean {
   if (filters.statusFilter !== "all" && application.status !== filters.statusFilter) {
     return false;
   }
@@ -32,7 +30,7 @@ function matchesFilters(application: JobApplication, filters: DashboardFilters, 
   }
 
   if (search) {
-    const haystack = `${application.company.toString()} ${application.position}`.toLowerCase();
+    const haystack = `${application.company} ${application.position}`.toLowerCase();
     if (!haystack.includes(search)) {
       return false;
     }
@@ -42,22 +40,17 @@ function matchesFilters(application: JobApplication, filters: DashboardFilters, 
 }
 
 export function filterAndSortApplications(
-  applications: JobApplication[],
+  applications: KanbanApplication[],
   filters: DashboardFilters,
-): JobApplication[] {
+): KanbanApplication[] {
   assertNoDuplicateIds(applications);
-
-  // Computed eagerly for every application (not lazily inside the sort comparator): Array.prototype.sort
-  // isn't guaranteed to invoke the comparator for arrays of 0 or 1 elements, which would silently skip
-  // this validation for those cases otherwise.
-  const activityDates = new Map(applications.map((application) => [application, getActivityDate(application)]));
 
   const search = filters.searchValue.trim().toLowerCase();
   const filtered = applications.filter((application) => matchesFilters(application, filters, search));
 
   return filtered.sort((a, b) => {
-    const dateA = activityDates.get(a)!;
-    const dateB = activityDates.get(b)!;
+    const dateA = a.sortDate ?? null;
+    const dateB = b.sortDate ?? null;
 
     if (!dateA && !dateB) return 0;
     if (!dateA) return 1;

@@ -65,8 +65,7 @@ export function getActivityDate(application: JobApplication): Date | null {
   }
 }
 
-function buildDateLabel(application: JobApplication): string | null {
-  const activityDate = getActivityDate(application);
+function buildDateLabel(application: JobApplication, activityDate: Date | null): string | null {
   if (!activityDate) {
     return null;
   }
@@ -76,6 +75,7 @@ function buildDateLabel(application: JobApplication): string | null {
 
 export function toKanbanApplication(application: JobApplication): KanbanApplication {
   const company = application.company.toString();
+  const activityDate = getActivityDate(application);
 
   return {
     id: application.id.toString(),
@@ -83,6 +83,7 @@ export function toKanbanApplication(application: JobApplication): KanbanApplicat
     initials: getInitials(company),
     position: application.position,
     status: application.status as StatusKey,
-    dateLabel: buildDateLabel(application),
+    dateLabel: buildDateLabel(application, activityDate),
+    sortDate: activityDate,
   };
 }

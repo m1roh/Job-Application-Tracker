@@ -10,6 +10,8 @@ export type KanbanApplication = {
   position: string;
   status: StatusKey;
   dateLabel?: string | null;
+  /** Raw date behind dateLabel, used to sort applications — not rendered directly. */
+  sortDate?: Date | null;
 };
 
 export type KanbanBoardProps = {
