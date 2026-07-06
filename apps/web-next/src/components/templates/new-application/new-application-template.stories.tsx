@@ -43,6 +43,14 @@ export const Default: Story = {
     await userEvent.type(positionInput, "I");
     await expect(args.onPositionChange).toHaveBeenCalledWith("I");
 
+    const offerUrlInput = canvas.getByLabelText("Lien de l'offre");
+    await userEvent.type(offerUrlInput, "h");
+    await expect(args.onOfferUrlChange).toHaveBeenCalledWith("h");
+
+    const notesInput = canvas.getByLabelText("Notes");
+    await userEvent.type(notesInput, "N");
+    await expect(args.onNotesChange).toHaveBeenCalledWith("N");
+
     await userEvent.click(canvas.getByRole("button", { name: "Annuler" }));
     await expect(args.onCancel).toHaveBeenCalledOnce();
 
