@@ -38,6 +38,21 @@ export const WithoutOfferLink: Story = {
   },
 };
 
+export const WithoutHistory: Story = {
+  args: {
+    status: "to_contact",
+    applicationDateLabel: null,
+    nextFollowUpLabel: null,
+    offerUrl: null,
+    notes: "",
+    history: [],
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText("Aucun historique pour l'instant")).toBeInTheDocument();
+  },
+};
+
 export const Sent: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

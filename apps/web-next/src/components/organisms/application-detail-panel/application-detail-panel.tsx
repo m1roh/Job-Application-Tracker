@@ -75,20 +75,24 @@ export function ApplicationDetailPanel({
 
       <div>
         <div className={styles.timelineLabel}>Historique</div>
-        <div>
-          {history.map((entry, index) => (
-            <div key={`${entry.label}-${entry.date}`} className={styles.timelineEntry}>
-              <div className={styles.timelineMarker}>
-                <span className={styles.timelineDot} style={{ backgroundColor: entry.dotColor }} />
-                {index < history.length - 1 ? <span className={styles.timelineLine} /> : null}
+        {history.length === 0 ? (
+          <div className={styles.timelineEmpty}>Aucun historique pour l&apos;instant</div>
+        ) : (
+          <div>
+            {history.map((entry, index) => (
+              <div key={`${entry.label}-${entry.date}`} className={styles.timelineEntry}>
+                <div className={styles.timelineMarker}>
+                  <span className={styles.timelineDot} style={{ backgroundColor: entry.dotColor }} />
+                  {index < history.length - 1 ? <span className={styles.timelineLine} /> : null}
+                </div>
+                <div className={styles.timelineContent}>
+                  <div className={styles.timelineEntryLabel}>{entry.label}</div>
+                  <div className={styles.timelineEntryDate}>{entry.date}</div>
+                </div>
               </div>
-              <div className={styles.timelineContent}>
-                <div className={styles.timelineEntryLabel}>{entry.label}</div>
-                <div className={styles.timelineEntryDate}>{entry.date}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

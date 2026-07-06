@@ -85,6 +85,11 @@
   margin-bottom: 14px;
 }
 
+.timelineEmpty {
+  font-size: 13px;
+  color: var(--color-text-caption);
+}
+
 .timelineEntry {
   display: flex;
   gap: 12px;
