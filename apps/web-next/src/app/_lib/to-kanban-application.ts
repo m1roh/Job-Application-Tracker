@@ -1,0 +1,74 @@
+import type { ApplicationStatus, JobApplication } from "@job-tracker/core/domain/job-application.js";
+import type { StatusKey } from "@job-tracker/design-tokens";
+import type { KanbanApplication } from "../../components/organisms/kanban-board/kanban-board.js";
+import { formatDate } from "./format-date.js";
+import { getInitials } from "./get-initials.js";
+
+const STATUS_VERBS: Partial<Record<ApplicationStatus, string>> = {
+  application_sent: "Envoyée le",
+  follow_up_sent: "Relance le",
+  hr_interview: "Entretien RH le",
+  technical_interview: "Entretien technique le",
+  offer_received: "Reçue le",
+  rejected: "Refus le",
+  on_hold: "En pause depuis le",
+  withdrawn: "Abandonnée le",
+};
+
+function dateOfMostRecentTransitionTo(application: JobApplication, status: ApplicationStatus): Date | null {
+  const matches = application.history.filter((entry) => entry.newStatus === status);
+  return matches.length > 0 ? matches[matches.length - 1]!.date : null;
+}
+
+function buildDateLabel(application: JobApplication): string | null {
+  const { status } = application;
+
+  switch (status) {
+    case "to_contact":
+    case "offer_open":
+      return null;
+
+    case "application_sent":
+      return application.applicationDate ? `Envoyée le ${formatDate(application.applicationDate)}` : null;
+
+    case "follow_up_sent": {
+      if (application.nextFollowUp) {
+        return `Relance le ${formatDate(application.nextFollowUp)}`;
+      }
+      const historyDate = dateOfMostRecentTransitionTo(application, status);
+      if (!historyDate) {
+        throw new Error(`Invalid JobApplication: no history entry for status ${status}`);
+      }
+      return `Relance le ${formatDate(historyDate)}`;
+    }
+
+    case "hr_interview":
+    case "technical_interview":
+    case "offer_received":
+    case "rejected":
+    case "on_hold":
+    case "withdrawn": {
+      const historyDate = dateOfMostRecentTransitionTo(application, status);
+      if (!historyDate) {
+        throw new Error(`Invalid JobApplication: no history entry for status ${status}`);
+      }
+      return `${STATUS_VERBS[status]} ${formatDate(historyDate)}`;
+    }
+
+    default:
+      throw new Error(`Invalid JobApplication: unrecognized status ${status as string}`);
+  }
+}
+
+export function toKanbanApplication(application: JobApplication): KanbanApplication {
+  const company = application.company.toString();
+
+  return {
+    id: application.id.toString(),
+    company,
+    initials: getInitials(company),
+    position: application.position,
+    status: application.status as StatusKey,
+    dateLabel: buildDateLabel(application),
+  };
+}
