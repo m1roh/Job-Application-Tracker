@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "exports": {
+    "./*": "./src/*"
+  },
   "dependencies": {
     "@job-tracker/core": "workspace:*",
     "mongodb": "^7.4.0"
