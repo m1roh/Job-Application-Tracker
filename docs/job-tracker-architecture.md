@@ -26,6 +26,8 @@
 | Tests frontend | Storybook Test (`@storybook/addon-vitest`) — les stories deviennent des tests Vitest exécutables | Une story avec une fonction `play` sert à la fois de documentation visuelle et de test d'interaction — pas de duplication entre Storybook et une suite de tests séparée. Fonctionne pareil sur React et Angular (via `@analogjs/storybook-angular` côté Angular) |
 | Accessibilité | `@storybook/addon-a11y` (axe-core, WCAG) | S'intègre nativement à l'addon Vitest déjà choisi — les vérifications a11y tournent dans les mêmes tests que les stories, pas d'outil séparé. Détecte automatiquement ~57% des problèmes WCAG (contraste, rôles ARIA manquants, etc.) |
 | Documentation frontend | Storybook Autodocs + MDX | Doc générée automatiquement depuis les stories (props, variantes) pour chaque atom/molecule/organism, complétée par des pages MDX pour les guidelines transverses (principes d'accessibilité, règles d'usage du design system) |
+| Tests visuels (régression) | `@chromatic-com/storybook` (Chromatic) | Détecte les régressions pixel par pixel (couleur, layout) que les tests d'interaction et d'accessibilité ne couvrent pas. Service cloud externe, compte à créer, palier gratuit pour un usage perso |
+| Couverture de code | Coverage natif de l'addon Vitest (pas `@storybook/addon-coverage`) | Puisque le projet utilise déjà l'addon Vitest (section précédente), le coverage est inclus nativement — le paquet `@storybook/addon-coverage` séparé est fait pour l'ancien test-runner Jest+Playwright et serait redondant ici |
 
 **Note sur le driver MongoDB natif** : sans ODM, c'est à l'adapter (`candidature-repository.mongodb.ts`) de faire la conversion explicite entre l'entité `Candidature` du domaine et le document MongoDB stocké. Un peu plus de code à écrire au début, mais aucune fuite d'un concept d'infrastructure vers le domaine — et comme cet adapter est partagé entre Next.js et NestJS, tu ne l'écris qu'une seule fois.
 
@@ -334,6 +336,14 @@ Chaque story (atom/molecule/organism) est automatiquement vérifiée par `@story
 **Documentation frontend — intégrée à Storybook, pas un document séparé**
 
 Chaque atom/molecule/organism génère sa page de doc automatiquement (Autodocs) à partir de sa story et de ses `argTypes` — props, variantes, exemples. Les guidelines transverses (principes d'accessibilité du projet, règles d'usage du design system, contraintes de la section 12) vivent dans des pages MDX dédiées, consultables au même endroit. Ça évite un doc frontend qui vieillit mal en étant déconnecté du code réel — la doc et le composant sont mis à jour ensemble, dans le même commit.
+
+**Tests visuels — Chromatic, en complément, pas en remplacement**
+
+`npx storybook add @chromatic-com/storybook` ajoute la détection de régression visuelle pixel par pixel : utile pour attraper une dérive de couleur par rapport aux tokens exacts de la section 12, ou un décalage de layout qu'aucun test fonctionnel ne verrait. Nécessite un compte Chromatic (service cloud, palier gratuit suffisant pour un usage perso) — à créer avant la première exécution. Ne remplace ni les tests d'interaction (`addon-vitest`) ni l'accessibilité (`addon-a11y`), ce sont trois couches différentes qui attrapent des classes de bugs différentes.
+
+**Couverture de code — via le coverage natif de Vitest, pas un addon séparé**
+
+Le coverage s'active dans la config Vitest déjà en place (`coverage: { enabled: true, provider: 'v8' }` dans `vitest.config.ts` de chaque package/app, ou l'équivalent dans la config de l'addon Vitest de Storybook) — pas besoin d'installer `@storybook/addon-coverage`, qui cible l'ancien test-runner Jest+Playwright et ferait doublon avec ce qui est déjà natif à l'approche Vitest retenue.
 
 Ne commence jamais la phase B avant que la phase A soit complète et testée. C'est le seul moyen de vraiment vérifier que le domaine est réutilisable tel quel.
 
