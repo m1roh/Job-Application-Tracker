@@ -20,7 +20,12 @@ function dateOfMostRecentTransitionTo(application: JobApplication, status: Appli
   return matches.length > 0 ? matches[matches.length - 1]!.date : null;
 }
 
-function buildDateLabel(application: JobApplication): string | null {
+/**
+ * The date that best represents an application's most recent activity, or null when
+ * nothing has happened yet (to_contact/offer_open). Used both to build the Kanban card's
+ * dateLabel and to sort applications by recency.
+ */
+export function getActivityDate(application: JobApplication): Date | null {
   const { status } = application;
 
   switch (status) {
@@ -29,17 +34,17 @@ function buildDateLabel(application: JobApplication): string | null {
       return null;
 
     case "application_sent":
-      return application.applicationDate ? `Envoyée le ${formatDate(application.applicationDate)}` : null;
+      return application.applicationDate;
 
     case "follow_up_sent": {
       if (application.nextFollowUp) {
-        return `Relance le ${formatDate(application.nextFollowUp)}`;
+        return application.nextFollowUp;
       }
       const historyDate = dateOfMostRecentTransitionTo(application, status);
       if (!historyDate) {
         throw new Error(`Invalid JobApplication: no history entry for status ${status}`);
       }
-      return `Relance le ${formatDate(historyDate)}`;
+      return historyDate;
     }
 
     case "hr_interview":
@@ -52,12 +57,21 @@ function buildDateLabel(application: JobApplication): string | null {
       if (!historyDate) {
         throw new Error(`Invalid JobApplication: no history entry for status ${status}`);
       }
-      return `${STATUS_VERBS[status]} ${formatDate(historyDate)}`;
+      return historyDate;
     }
 
     default:
       throw new Error(`Invalid JobApplication: unrecognized status ${status as string}`);
   }
+}
+
+function buildDateLabel(application: JobApplication): string | null {
+  const activityDate = getActivityDate(application);
+  if (!activityDate) {
+    return null;
+  }
+
+  return `${STATUS_VERBS[application.status]!} ${formatDate(activityDate)}`;
 }
 
 export function toKanbanApplication(application: JobApplication): KanbanApplication {
