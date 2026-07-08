@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { KanbanApplication } from "../../components/organisms/kanban-board/kanban-board";
-import { filterAndSortApplications, type DashboardFilters } from "./filter-and-sort-applications.js";
+import { filterAndSortApplications, type DashboardFilters } from "./filter-and-sort-applications";
 
 let nextId = 0;
 

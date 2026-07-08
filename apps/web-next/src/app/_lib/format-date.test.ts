@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDate } from "./format-date.js";
+import { formatDate } from "./format-date";
 
 describe("formatDate", () => {
   it("throws when given an invalid Date", () => {

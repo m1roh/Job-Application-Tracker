@@ -1,6 +1,6 @@
-import type { JobApplication } from "../../domain/job-application.js";
-import type { JobApplicationId } from "../../domain/value-objects/job-application-id.js";
-import type { JobApplicationRepository } from "../ports/job-application-repository.js";
+import type { JobApplication } from "../../domain/job-application";
+import type { JobApplicationId } from "../../domain/value-objects/job-application-id";
+import type { JobApplicationRepository } from "../ports/job-application-repository";
 
 export class PlanFollowUpUseCase {
   constructor(private readonly repository: JobApplicationRepository) {}

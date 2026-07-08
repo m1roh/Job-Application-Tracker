@@ -1,4 +1,4 @@
-import type { ApplicationStatus, JobApplication } from "@job-tracker/core/domain/job-application.js";
+import type { ApplicationStatus, JobApplication } from "@job-tracker/core/domain/job-application";
 import type { StatItem } from "../../components/templates/dashboard/dashboard-template";
 import { statusLabels } from "../../components/molecules/status-badge/status-badge";
 

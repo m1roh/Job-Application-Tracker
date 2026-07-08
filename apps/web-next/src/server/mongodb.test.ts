@@ -30,21 +30,21 @@ describe("getJobApplicationsCollection", () => {
 
   it("throws when MONGODB_URI is missing", async () => {
     delete process.env.MONGODB_URI;
-    const { getJobApplicationsCollection } = await import("./mongodb.js");
+    const { getJobApplicationsCollection } = await import("./mongodb");
 
     await expect(getJobApplicationsCollection()).rejects.toThrow("MONGODB_URI");
   });
 
   it("throws when MONGODB_DB_NAME is missing", async () => {
     delete process.env.MONGODB_DB_NAME;
-    const { getJobApplicationsCollection } = await import("./mongodb.js");
+    const { getJobApplicationsCollection } = await import("./mongodb");
 
     await expect(getJobApplicationsCollection()).rejects.toThrow("MONGODB_DB_NAME");
   });
 
   it("does not attempt to connect when an environment variable is missing", async () => {
     delete process.env.MONGODB_URI;
-    const { getJobApplicationsCollection } = await import("./mongodb.js");
+    const { getJobApplicationsCollection } = await import("./mongodb");
 
     await expect(getJobApplicationsCollection()).rejects.toThrow();
     expect(connectMock).not.toHaveBeenCalled();
@@ -52,7 +52,7 @@ describe("getJobApplicationsCollection", () => {
 
   it("reuses the same MongoClient connection across calls", async () => {
     const { MongoClient } = await import("mongodb");
-    const { getJobApplicationsCollection } = await import("./mongodb.js");
+    const { getJobApplicationsCollection } = await import("./mongodb");
 
     await getJobApplicationsCollection();
     await getJobApplicationsCollection();
@@ -61,7 +61,7 @@ describe("getJobApplicationsCollection", () => {
   });
 
   it("returns the job-applications collection from the configured database", async () => {
-    const { getJobApplicationsCollection } = await import("./mongodb.js");
+    const { getJobApplicationsCollection } = await import("./mongodb");
 
     await getJobApplicationsCollection();
 

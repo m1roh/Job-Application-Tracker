@@ -1,5 +1,5 @@
 import { MongoClient, type Collection } from "mongodb";
-import type { JobApplicationDocument } from "@job-tracker/infrastructure/repositories/job-application-repository.mongodb.js";
+import type { JobApplicationDocument } from "@job-tracker/infrastructure/repositories/job-application-repository.mongodb";
 
 declare global {
   // eslint-disable-next-line no-var

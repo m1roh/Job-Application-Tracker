@@ -1,8 +1,8 @@
-import { JobApplication } from "../../domain/job-application.js";
-import { CompanyName } from "../../domain/value-objects/company-name.js";
-import { JobApplicationId } from "../../domain/value-objects/job-application-id.js";
-import type { Clock } from "../ports/clock.js";
-import type { JobApplicationRepository } from "../ports/job-application-repository.js";
+import { JobApplication } from "../../domain/job-application";
+import { CompanyName } from "../../domain/value-objects/company-name";
+import { JobApplicationId } from "../../domain/value-objects/job-application-id";
+import type { Clock } from "../ports/clock";
+import type { JobApplicationRepository } from "../ports/job-application-repository";
 
 export type CreateJobApplicationCommand = {
   company: string;

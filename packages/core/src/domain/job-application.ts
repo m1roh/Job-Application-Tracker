@@ -1,5 +1,5 @@
-import type { CompanyName } from "./value-objects/company-name.js";
-import type { JobApplicationId } from "./value-objects/job-application-id.js";
+import type { CompanyName } from "./value-objects/company-name";
+import type { JobApplicationId } from "./value-objects/job-application-id";
 
 export type ApplicationStatus =
   | "to_contact"

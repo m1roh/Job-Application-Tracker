@@ -22,7 +22,11 @@
         "name": "next"
       }
     ],
-    "allowJs": true
+    "allowJs": true,
+    "paths": {
+      "@job-tracker/core/*": ["../../packages/core/src/*"],
+      "@job-tracker/infrastructure/*": ["../../packages/infrastructure/src/*"]
+    }
   },
   "include": [
     "next-env.d.ts",

@@ -1,8 +1,8 @@
-import { JobApplication, type JobApplicationSnapshot } from "@job-tracker/core/domain/job-application.js";
-import { CompanyName } from "@job-tracker/core/domain/value-objects/company-name.js";
-import { JobApplicationId } from "@job-tracker/core/domain/value-objects/job-application-id.js";
+import { JobApplication, type JobApplicationSnapshot } from "@job-tracker/core/domain/job-application";
+import { CompanyName } from "@job-tracker/core/domain/value-objects/company-name";
+import { JobApplicationId } from "@job-tracker/core/domain/value-objects/job-application-id";
 import { describe, expect, it } from "vitest";
-import { toKanbanApplication } from "./to-kanban-application.js";
+import { toKanbanApplication } from "./to-kanban-application";
 
 function buildApplication(overrides: Partial<JobApplicationSnapshot> = {}): JobApplication {
   return JobApplication.reconstitute({

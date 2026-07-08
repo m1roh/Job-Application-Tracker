@@ -1,13 +1,13 @@
-import { JobApplication } from "@job-tracker/core/domain/job-application.js";
-import { CompanyName } from "@job-tracker/core/domain/value-objects/company-name.js";
-import { JobApplicationId } from "@job-tracker/core/domain/value-objects/job-application-id.js";
+import { JobApplication } from "@job-tracker/core/domain/job-application";
+import { CompanyName } from "@job-tracker/core/domain/value-objects/company-name";
+import { JobApplicationId } from "@job-tracker/core/domain/value-objects/job-application-id";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { MongoClient, type Collection } from "mongodb";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import {
   MongoJobApplicationRepository,
   type JobApplicationDocument,
-} from "./job-application-repository.mongodb.js";
+} from "./job-application-repository.mongodb";
 
 const NOW = new Date("2026-07-02T10:00:00.000Z");
 

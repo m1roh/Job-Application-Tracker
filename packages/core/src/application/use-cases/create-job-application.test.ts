@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { CreateJobApplicationUseCase } from "./create-job-application.js";
-import { FixedClock } from "./test-doubles/fixed-clock.js";
-import { InMemoryJobApplicationRepository } from "./test-doubles/in-memory-job-application-repository.js";
+import { CreateJobApplicationUseCase } from "./create-job-application";
+import { FixedClock } from "./test-doubles/fixed-clock";
+import { InMemoryJobApplicationRepository } from "./test-doubles/in-memory-job-application-repository";
 
 const NOW = new Date("2026-07-02T10:00:00.000Z");
 

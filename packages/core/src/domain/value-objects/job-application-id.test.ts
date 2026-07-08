@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { JobApplicationId } from "./job-application-id.js";
+import { JobApplicationId } from "./job-application-id";
 
 describe("JobApplicationId", () => {
   describe("from (invalid cases)", () => {

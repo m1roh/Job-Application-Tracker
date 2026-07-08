@@ -10,7 +10,10 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "isolatedModules": true,
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@job-tracker/core/*": ["../core/src/*"]
+    }
   },
   "include": ["src"]
 }

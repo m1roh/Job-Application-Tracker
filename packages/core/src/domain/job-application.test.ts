@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { JobApplication, type ApplicationStatus, type JobApplicationSnapshot } from "./job-application.js";
-import { CompanyName } from "./value-objects/company-name.js";
-import { JobApplicationId } from "./value-objects/job-application-id.js";
+import { JobApplication, type ApplicationStatus, type JobApplicationSnapshot } from "./job-application";
+import { CompanyName } from "./value-objects/company-name";
+import { JobApplicationId } from "./value-objects/job-application-id";
 
 const NOW = new Date("2026-07-02T10:00:00.000Z");
 

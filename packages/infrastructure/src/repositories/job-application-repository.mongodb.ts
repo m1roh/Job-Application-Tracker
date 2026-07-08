@@ -1,8 +1,8 @@
-import type { ApplicationStatus, JobApplicationSnapshot, StatusChange } from "@job-tracker/core/domain/job-application.js";
-import { JobApplication } from "@job-tracker/core/domain/job-application.js";
-import { CompanyName } from "@job-tracker/core/domain/value-objects/company-name.js";
-import { JobApplicationId } from "@job-tracker/core/domain/value-objects/job-application-id.js";
-import type { ApplicationFilter, JobApplicationRepository } from "@job-tracker/core/application/ports/job-application-repository.js";
+import type { ApplicationStatus, JobApplicationSnapshot, StatusChange } from "@job-tracker/core/domain/job-application";
+import { JobApplication } from "@job-tracker/core/domain/job-application";
+import { CompanyName } from "@job-tracker/core/domain/value-objects/company-name";
+import { JobApplicationId } from "@job-tracker/core/domain/value-objects/job-application-id";
+import type { ApplicationFilter, JobApplicationRepository } from "@job-tracker/core/application/ports/job-application-repository";
 import type { Collection, Filter } from "mongodb";
 
 export type JobApplicationDocument = {

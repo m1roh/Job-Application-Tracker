@@ -1,5 +1,5 @@
-import type { ApplicationStatus, JobApplication } from "../../domain/job-application.js";
-import type { JobApplicationId } from "../../domain/value-objects/job-application-id.js";
+import type { ApplicationStatus, JobApplication } from "../../domain/job-application";
+import type { JobApplicationId } from "../../domain/value-objects/job-application-id";
 
 export type ApplicationFilter = {
   status?: ApplicationStatus;

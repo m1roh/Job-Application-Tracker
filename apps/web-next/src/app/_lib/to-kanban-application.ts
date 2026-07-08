@@ -1,4 +1,4 @@
-import type { ApplicationStatus, JobApplication } from "@job-tracker/core/domain/job-application.js";
+import type { ApplicationStatus, JobApplication } from "@job-tracker/core/domain/job-application";
 import type { StatusKey } from "@job-tracker/design-tokens";
 import type { KanbanApplication } from "../../components/organisms/kanban-board/kanban-board";
 import { formatDate } from "./format-date";

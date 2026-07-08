@@ -1,7 +1,7 @@
-import type { ApplicationStatus, JobApplication } from "../../domain/job-application.js";
-import type { JobApplicationId } from "../../domain/value-objects/job-application-id.js";
-import type { Clock } from "../ports/clock.js";
-import type { JobApplicationRepository } from "../ports/job-application-repository.js";
+import type { ApplicationStatus, JobApplication } from "../../domain/job-application";
+import type { JobApplicationId } from "../../domain/value-objects/job-application-id";
+import type { Clock } from "../ports/clock";
+import type { JobApplicationRepository } from "../ports/job-application-repository";
 
 export class ChangeApplicationStatusUseCase {
   constructor(

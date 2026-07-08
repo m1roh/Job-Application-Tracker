@@ -1,6 +1,6 @@
-import type { JobApplication } from "../../../domain/job-application.js";
-import type { JobApplicationId } from "../../../domain/value-objects/job-application-id.js";
-import type { ApplicationFilter, JobApplicationRepository } from "../../ports/job-application-repository.js";
+import type { JobApplication } from "../../../domain/job-application";
+import type { JobApplicationId } from "../../../domain/value-objects/job-application-id";
+import type { ApplicationFilter, JobApplicationRepository } from "../../ports/job-application-repository";
 
 export class InMemoryJobApplicationRepository implements JobApplicationRepository {
   private readonly applications = new Map<string, JobApplication>();

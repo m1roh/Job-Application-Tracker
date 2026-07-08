@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { ChangeApplicationStatusUseCase } from "./change-application-status.js";
-import { CreateJobApplicationUseCase } from "./create-job-application.js";
-import { ListJobApplicationsUseCase } from "./list-job-applications.js";
-import { FixedClock } from "./test-doubles/fixed-clock.js";
-import { InMemoryJobApplicationRepository } from "./test-doubles/in-memory-job-application-repository.js";
+import { ChangeApplicationStatusUseCase } from "./change-application-status";
+import { CreateJobApplicationUseCase } from "./create-job-application";
+import { ListJobApplicationsUseCase } from "./list-job-applications";
+import { FixedClock } from "./test-doubles/fixed-clock";
+import { InMemoryJobApplicationRepository } from "./test-doubles/in-memory-job-application-repository";
 
 const NOW = new Date("2026-07-02T10:00:00.000Z");
 
