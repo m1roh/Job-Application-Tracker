@@ -2,8 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { CreateJobApplicationUseCase } from "@job-tracker/core/application/use-cases/create-job-application";
+import { GetJobApplicationUseCase } from "@job-tracker/core/application/use-cases/get-job-application";
 import { ListJobApplicationsUseCase } from "@job-tracker/core/application/use-cases/list-job-applications";
 import type { JobApplication } from "@job-tracker/core/domain/job-application";
+import { JobApplicationId } from "@job-tracker/core/domain/value-objects/job-application-id";
 import { MongoJobApplicationRepository } from "@job-tracker/infrastructure/repositories/job-application-repository.mongodb";
 import { SystemClock } from "@job-tracker/infrastructure/services/clock.impl";
 import { getJobApplicationsCollection } from "../../server/mongodb";
@@ -46,4 +48,20 @@ export async function createJobApplicationAction(
   } catch (error) {
     return { error: error instanceof Error ? error.message : "Une erreur est survenue." };
   }
+}
+
+export async function getJobApplicationAction(id: string): Promise<JobApplication | null> {
+  let jobApplicationId: JobApplicationId;
+
+  try {
+    jobApplicationId = JobApplicationId.from(id);
+  } catch {
+    return null;
+  }
+
+  const collection = await getJobApplicationsCollection();
+  const repository = new MongoJobApplicationRepository(collection);
+  const useCase = new GetJobApplicationUseCase(repository);
+
+  return useCase.execute(jobApplicationId);
 }

@@ -3,12 +3,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const findMock = vi.fn();
 const toArrayMock = vi.fn();
 const replaceOneMock = vi.fn();
+const findOneMock = vi.fn();
 const revalidatePathMock = vi.fn();
 
 vi.mock("../../server/mongodb", () => ({
   getJobApplicationsCollection: vi.fn().mockResolvedValue({
     find: findMock,
     replaceOne: replaceOneMock,
+    findOne: findOneMock,
   }),
 }));
 
@@ -150,5 +152,54 @@ describe("createJobApplicationAction", () => {
     const result = await createJobApplicationAction({ company: "Nova Tech", position: "Dev", offerUrl: "", notes: "" });
 
     expect(result).toEqual({ error: "Une erreur est survenue." });
+  });
+});
+
+describe("getJobApplicationAction", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    process.env = { ...originalEnv };
+  });
+
+  it("returns null for a malformed id, without querying Mongo", async () => {
+    const { getJobApplicationAction } = await import("./actions");
+
+    const result = await getJobApplicationAction("not-a-uuid");
+
+    expect(result).toBeNull();
+    expect(findOneMock).not.toHaveBeenCalled();
+  });
+
+  it("returns null when no document matches the id", async () => {
+    findOneMock.mockResolvedValue(null);
+    const { getJobApplicationAction } = await import("./actions");
+
+    const result = await getJobApplicationAction("9c858901-8a57-4791-81fe-4c455b099bc9");
+
+    expect(result).toBeNull();
+  });
+
+  it("returns the matching application", async () => {
+    findOneMock.mockResolvedValue({
+      _id: "9c858901-8a57-4791-81fe-4c455b099bc9",
+      company: "Nova Tech",
+      position: "Dev. Full-Stack",
+      status: "to_contact",
+      applicationDate: null,
+      nextFollowUp: null,
+      offerUrl: null,
+      notes: "",
+      history: [],
+    });
+    const { getJobApplicationAction } = await import("./actions");
+
+    const result = await getJobApplicationAction("9c858901-8a57-4791-81fe-4c455b099bc9");
+
+    expect(result?.id.toString()).toBe("9c858901-8a57-4791-81fe-4c455b099bc9");
+    expect(result?.company.toString()).toBe("Nova Tech");
   });
 });
