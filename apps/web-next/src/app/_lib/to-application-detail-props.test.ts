@@ -54,6 +54,30 @@ describe("toApplicationDetailProps", () => {
     expect(result.status).toBe("to_contact");
   });
 
+  it("passes the application id through as a string", () => {
+    const id = JobApplicationId.generate();
+    const application = buildApplication({ id });
+    const result = toApplicationDetailProps(application);
+
+    expect(result.id).toBe(id.toString());
+  });
+
+  it("returns an empty nextStatusActions array for a terminal status", () => {
+    const application = buildApplication({ status: "rejected" });
+    expect(toApplicationDetailProps(application).nextStatusActions).toEqual([]);
+  });
+
+  it("maps allowedNextStatuses to status/label pairs", () => {
+    const application = buildApplication({ status: "to_contact" });
+    const result = toApplicationDetailProps(application);
+
+    expect(result.nextStatusActions).toEqual([
+      { status: "offer_open", label: "Offre ouverte", requiresConfirmation: false },
+      { status: "application_sent", label: "Candidature envoyée", requiresConfirmation: false },
+      { status: "withdrawn", label: "Abandonné", requiresConfirmation: true },
+    ]);
+  });
+
   it("has null applicationDateLabel/nextFollowUpLabel when not set", () => {
     const application = buildApplication({ applicationDate: null, nextFollowUp: null });
     const result = toApplicationDetailProps(application);

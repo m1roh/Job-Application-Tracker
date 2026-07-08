@@ -1,10 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { ChangeApplicationStatusUseCase } from "@job-tracker/core/application/use-cases/change-application-status";
 import { CreateJobApplicationUseCase } from "@job-tracker/core/application/use-cases/create-job-application";
 import { GetJobApplicationUseCase } from "@job-tracker/core/application/use-cases/get-job-application";
 import { ListJobApplicationsUseCase } from "@job-tracker/core/application/use-cases/list-job-applications";
-import type { JobApplication } from "@job-tracker/core/domain/job-application";
+import type { ApplicationStatus, JobApplication } from "@job-tracker/core/domain/job-application";
 import { JobApplicationId } from "@job-tracker/core/domain/value-objects/job-application-id";
 import { MongoJobApplicationRepository } from "@job-tracker/infrastructure/repositories/job-application-repository.mongodb";
 import { SystemClock } from "@job-tracker/infrastructure/services/clock.impl";
@@ -45,6 +46,28 @@ export async function createJobApplicationAction(
     revalidatePath("/");
 
     return { id: application.id.toString() };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Une erreur est survenue." };
+  }
+}
+
+export type ChangeApplicationStatusResult = { status: ApplicationStatus } | { error: string };
+
+export async function changeApplicationStatusAction(
+  id: string,
+  newStatus: ApplicationStatus,
+): Promise<ChangeApplicationStatusResult> {
+  try {
+    const collection = await getJobApplicationsCollection();
+    const repository = new MongoJobApplicationRepository(collection);
+    const useCase = new ChangeApplicationStatusUseCase(repository, new SystemClock());
+
+    const application = await useCase.execute(JobApplicationId.from(id), newStatus);
+
+    revalidatePath("/");
+    revalidatePath(`/candidatures/${id}`);
+
+    return { status: application.status };
   } catch (error) {
     return { error: error instanceof Error ? error.message : "Une erreur est survenue." };
   }

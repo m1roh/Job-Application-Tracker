@@ -7,6 +7,7 @@ import type {
 import { statusLabels } from "../../components/molecules/status-badge/status-badge";
 import { formatDate } from "./format-date";
 import { getInitials } from "./get-initials";
+import { requiresStatusConfirmation } from "./requires-status-confirmation";
 
 function assertKnownStatus(status: string): asserts status is StatusKey {
   if (!(status in statusLabels)) {
@@ -14,7 +15,11 @@ function assertKnownStatus(status: string): asserts status is StatusKey {
   }
 }
 
-export function toApplicationDetailProps(application: JobApplication): ApplicationDetailPanelProps {
+export type ApplicationDetailProps = Omit<ApplicationDetailPanelProps, "pendingStatus" | "onStatusSelect"> & {
+  id: string;
+};
+
+export function toApplicationDetailProps(application: JobApplication): ApplicationDetailProps {
   assertKnownStatus(application.status);
 
   const company = application.company.toString();
@@ -29,7 +34,14 @@ export function toApplicationDetailProps(application: JobApplication): Applicati
     };
   });
 
+  const nextStatusActions = application.allowedNextStatuses().map((status) => {
+    assertKnownStatus(status);
+
+    return { status, label: statusLabels[status], requiresConfirmation: requiresStatusConfirmation(status) };
+  });
+
   return {
+    id: application.id.toString(),
     company,
     initials: getInitials(company),
     position: application.position,
@@ -39,5 +51,6 @@ export function toApplicationDetailProps(application: JobApplication): Applicati
     offerUrl: application.offerUrl,
     notes: application.notes,
     history,
+    nextStatusActions,
   };
 }

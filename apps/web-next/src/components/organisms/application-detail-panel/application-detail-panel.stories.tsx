@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { statusColors } from "@job-tracker/design-tokens";
-import { expect, within } from "storybook/test";
+import { expect, fn, userEvent, within } from "storybook/test";
 import { ApplicationDetailPanel } from "./application-detail-panel";
 
 const meta: Meta<typeof ApplicationDetailPanel> = {
@@ -19,6 +19,12 @@ const meta: Meta<typeof ApplicationDetailPanel> = {
       { label: "Candidature envoyée", date: "12 juin 2026", dotColor: statusColors.application_sent.dot },
       { label: "Candidature créée", date: "1 juin 2026", dotColor: statusColors.to_contact.dot },
     ],
+    nextStatusActions: [
+      { status: "hr_interview", label: "Entretien RH", requiresConfirmation: false },
+      { status: "rejected", label: "Refusé", requiresConfirmation: true },
+    ],
+    pendingStatus: null,
+    onStatusSelect: fn(),
   },
 };
 
@@ -54,7 +60,7 @@ export const WithoutHistory: Story = {
 };
 
 export const Sent: Story = {
-  play: async ({ canvasElement }) => {
+  play: async ({ args, canvasElement }) => {
     const canvas = within(canvasElement);
 
     await expect(canvas.getByText("Nova Tech")).toBeInTheDocument();
@@ -74,5 +80,19 @@ export const Sent: Story = {
 
     await expect(canvas.getByText("Candidature créée")).toBeInTheDocument();
     await expect(canvas.getByText("1 juin 2026")).toBeInTheDocument();
+
+    await userEvent.click(canvas.getByRole("button", { name: "Entretien RH" }));
+    await expect(args.onStatusSelect).toHaveBeenCalledWith("hr_interview");
+  },
+};
+
+export const TerminalStatusHasNoActions: Story = {
+  args: {
+    status: "rejected",
+    nextStatusActions: [],
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.queryByRole("button")).not.toBeInTheDocument();
   },
 };

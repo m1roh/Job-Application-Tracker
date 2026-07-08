@@ -199,6 +199,28 @@ describe("JobApplication", () => {
     });
   });
 
+  describe("allowedNextStatuses", () => {
+    for (const status of TERMINAL_STATUSES) {
+      it(`returns an empty array for the terminal status ${status}`, () => {
+        const application = moveTo(status);
+
+        expect(application.allowedNextStatuses()).toEqual([]);
+      });
+    }
+
+    it("returns the configured transitions for to_contact", () => {
+      const application = JobApplication.create(createParams(), NOW);
+
+      expect(application.allowedNextStatuses()).toEqual(["offer_open", "application_sent", "withdrawn"]);
+    });
+
+    it("returns only the status right before the pause for on_hold", () => {
+      const application = moveTo("on_hold");
+
+      expect(application.allowedNextStatuses()).toEqual(["hr_interview"]);
+    });
+  });
+
   describe("equals", () => {
     it("returns true for two applications with the same id", () => {
       const id = JobApplicationId.generate();

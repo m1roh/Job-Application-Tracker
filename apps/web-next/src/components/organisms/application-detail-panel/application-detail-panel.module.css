@@ -30,6 +30,10 @@
   margin-left: auto;
 }
 
+.statusActionsSlot:not(:empty) {
+  margin-bottom: 20px;
+}
+
 .metaGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

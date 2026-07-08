@@ -100,6 +100,10 @@ export class JobApplication {
     return VALID_TRANSITIONS[this.props.status];
   }
 
+  allowedNextStatuses(): ApplicationStatus[] {
+    return this.allowedDestinations();
+  }
+
   changeStatus(newStatus: ApplicationStatus, now: Date): JobApplication {
     if (!this.allowedDestinations().includes(newStatus)) {
       throw new Error(`Invalid transition: ${this.props.status} → ${newStatus}`);

@@ -1,6 +1,7 @@
 import { statusColors, type StatusKey } from "@job-tracker/design-tokens";
 import { CompanyAvatar } from "../../atoms/company-avatar/company-avatar";
 import { StatusBadge } from "../../molecules/status-badge/status-badge";
+import { StatusActions, type StatusActionItem } from "../status-actions/status-actions";
 import styles from "./application-detail-panel.module.css";
 
 export type HistoryEntry = {
@@ -19,6 +20,9 @@ export type ApplicationDetailPanelProps = {
   offerUrl: string | null;
   notes: string;
   history: HistoryEntry[];
+  nextStatusActions: StatusActionItem[];
+  pendingStatus: StatusKey | null;
+  onStatusSelect: (status: StatusKey) => void;
 };
 
 export function ApplicationDetailPanel({
@@ -31,6 +35,9 @@ export function ApplicationDetailPanel({
   offerUrl,
   notes,
   history,
+  nextStatusActions,
+  pendingStatus,
+  onStatusSelect,
 }: ApplicationDetailPanelProps) {
   const tokens = statusColors[status];
 
@@ -46,6 +53,10 @@ export function ApplicationDetailPanel({
           <div className={styles.badgeSlot}>
             <StatusBadge status={status} />
           </div>
+        </div>
+
+        <div className={styles.statusActionsSlot}>
+          <StatusActions actions={nextStatusActions} pendingStatus={pendingStatus} onSelect={onStatusSelect} />
         </div>
 
         <div className={styles.metaGrid}>
@@ -80,7 +91,7 @@ export function ApplicationDetailPanel({
         ) : (
           <div>
             {history.map((entry, index) => (
-              <div key={`${entry.label}-${entry.date}`} className={styles.timelineEntry}>
+              <div key={`${index}-${entry.label}-${entry.date}`} className={styles.timelineEntry}>
                 <div className={styles.timelineMarker}>
                   <span className={styles.timelineDot} style={{ backgroundColor: entry.dotColor }} />
                   {index < history.length - 1 ? <span className={styles.timelineLine} /> : null}

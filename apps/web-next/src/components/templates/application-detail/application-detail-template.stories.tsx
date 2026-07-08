@@ -24,6 +24,12 @@ const meta: Meta<typeof ApplicationDetailTemplate> = {
       { label: "Candidature envoyée", date: "12 juin 2026", dotColor: statusColors.application_sent.dot },
       { label: "Candidature créée", date: "1 juin 2026", dotColor: statusColors.to_contact.dot },
     ],
+    nextStatusActions: [
+      { status: "hr_interview", label: "Entretien RH", requiresConfirmation: false },
+      { status: "rejected", label: "Refusé", requiresConfirmation: true },
+    ],
+    pendingStatus: null,
+    onStatusSelect: fn(),
   },
 };
 
