@@ -2,11 +2,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const findMock = vi.fn();
 const toArrayMock = vi.fn();
+const replaceOneMock = vi.fn();
+const revalidatePathMock = vi.fn();
 
-vi.mock("../../server/mongodb.js", () => ({
+vi.mock("../../server/mongodb", () => ({
   getJobApplicationsCollection: vi.fn().mockResolvedValue({
     find: findMock,
+    replaceOne: replaceOneMock,
   }),
+}));
+
+vi.mock("next/cache", () => ({
+  revalidatePath: revalidatePathMock,
 }));
 
 const originalEnv = { ...process.env };
@@ -37,7 +44,7 @@ describe("listJobApplicationsAction", () => {
       },
     ]);
 
-    const { listJobApplicationsAction } = await import("./actions.js");
+    const { listJobApplicationsAction } = await import("./actions");
 
     // JobApplication.reconstitute doesn't validate its snapshot, so an unrecognized status
     // silently becomes part of the returned domain object rather than throwing here — this
@@ -61,7 +68,7 @@ describe("listJobApplicationsAction", () => {
       },
     ]);
 
-    const { listJobApplicationsAction } = await import("./actions.js");
+    const { listJobApplicationsAction } = await import("./actions");
     const applications = await listJobApplicationsAction();
 
     expect(applications).toHaveLength(1);
@@ -73,9 +80,75 @@ describe("listJobApplicationsAction", () => {
   it("returns an empty array when there are no stored applications", async () => {
     toArrayMock.mockResolvedValue([]);
 
-    const { listJobApplicationsAction } = await import("./actions.js");
+    const { listJobApplicationsAction } = await import("./actions");
     const applications = await listJobApplicationsAction();
 
     expect(applications).toEqual([]);
+  });
+});
+
+describe("createJobApplicationAction", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.clearAllMocks();
+    replaceOneMock.mockResolvedValue({});
+  });
+
+  afterEach(() => {
+    process.env = { ...originalEnv };
+  });
+
+  it("returns an error when the company name is empty, without saving anything", async () => {
+    const { createJobApplicationAction } = await import("./actions");
+
+    const result = await createJobApplicationAction({ company: "  ", position: "Dev", offerUrl: "", notes: "" });
+
+    expect(result).toEqual({ error: "Invalid CompanyName: value cannot be empty" });
+    expect(replaceOneMock).not.toHaveBeenCalled();
+    expect(revalidatePathMock).not.toHaveBeenCalled();
+  });
+
+  it("returns an error when the position is empty, without saving anything", async () => {
+    const { createJobApplicationAction } = await import("./actions");
+
+    const result = await createJobApplicationAction({ company: "Nova Tech", position: "  ", offerUrl: "", notes: "" });
+
+    expect(result).toEqual({ error: "Invalid JobApplication: position cannot be empty" });
+    expect(replaceOneMock).not.toHaveBeenCalled();
+    expect(revalidatePathMock).not.toHaveBeenCalled();
+  });
+
+  it("saves the application, revalidates the dashboard and returns its id on success", async () => {
+    const { createJobApplicationAction } = await import("./actions");
+
+    const result = await createJobApplicationAction({
+      company: "Nova Tech",
+      position: "Dev. Full-Stack",
+      offerUrl: "",
+      notes: "Contact via Camille",
+    });
+
+    expect(result).toHaveProperty("id");
+    expect(typeof (result as { id: string }).id).toBe("string");
+    expect(replaceOneMock).toHaveBeenCalledOnce();
+    expect(revalidatePathMock).toHaveBeenCalledWith("/");
+  });
+
+  it("stores an empty offerUrl as null", async () => {
+    const { createJobApplicationAction } = await import("./actions");
+
+    await createJobApplicationAction({ company: "Nova Tech", position: "Dev", offerUrl: "", notes: "" });
+
+    const [, savedDocument] = replaceOneMock.mock.calls[0]!;
+    expect(savedDocument.offerUrl).toBeNull();
+  });
+
+  it("falls back to a generic message when something other than an Error is thrown", async () => {
+    replaceOneMock.mockRejectedValueOnce("a non-Error rejection");
+    const { createJobApplicationAction } = await import("./actions");
+
+    const result = await createJobApplicationAction({ company: "Nova Tech", position: "Dev", offerUrl: "", notes: "" });
+
+    expect(result).toEqual({ error: "Une erreur est survenue." });
   });
 });
