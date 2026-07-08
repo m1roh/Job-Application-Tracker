@@ -11,9 +11,9 @@ const meta: Meta<typeof NewApplicationTemplate> = {
     onCreateApplication: fn(),
     userInitials: "YM",
 
-    company: "",
+    company: "Nova Tech",
     onCompanyChange: fn(),
-    position: "",
+    position: "Dev. Full-Stack",
     onPositionChange: fn(),
     offerUrl: "",
     onOfferUrlChange: fn(),
@@ -28,20 +28,33 @@ const meta: Meta<typeof NewApplicationTemplate> = {
 export default meta;
 type Story = StoryObj<typeof NewApplicationTemplate>;
 
+export const WithError: Story = {
+  args: {
+    error: "Le nom de l'entreprise ne peut pas être vide.",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText("Le nom de l'entreprise ne peut pas être vide.")).toBeInTheDocument();
+  },
+};
+
 export const Default: Story = {
   play: async ({ args, canvasElement }) => {
     const canvas = within(canvasElement);
 
     await expect(canvas.getByText("JobTracker")).toBeInTheDocument();
     await expect(canvas.getByRole("heading", { name: "Nouvelle candidature" })).toBeInTheDocument();
+    await expect(canvas.queryByRole("alert")).not.toBeInTheDocument();
 
     const companyInput = canvas.getByLabelText("Entreprise");
+    await expect(companyInput).toBeRequired();
     await userEvent.type(companyInput, "S");
-    await expect(args.onCompanyChange).toHaveBeenCalledWith("S");
+    await expect(args.onCompanyChange).toHaveBeenCalledWith("Nova TechS");
 
     const positionInput = canvas.getByLabelText("Poste");
+    await expect(positionInput).toBeRequired();
     await userEvent.type(positionInput, "I");
-    await expect(args.onPositionChange).toHaveBeenCalledWith("I");
+    await expect(args.onPositionChange).toHaveBeenCalledWith("Dev. Full-StackI");
 
     const offerUrlInput = canvas.getByLabelText("Lien de l'offre");
     await userEvent.type(offerUrlInput, "h");

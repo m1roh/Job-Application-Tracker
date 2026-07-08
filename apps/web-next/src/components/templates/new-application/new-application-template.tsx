@@ -23,6 +23,7 @@ export type NewApplicationTemplateProps = {
 
   onCancel: () => void;
   onSubmit: () => void;
+  error?: string | null;
 };
 
 export function NewApplicationTemplate({
@@ -40,6 +41,7 @@ export function NewApplicationTemplate({
   onNotesChange,
   onCancel,
   onSubmit,
+  error,
 }: NewApplicationTemplateProps) {
   return (
     <div className={styles.page}>
@@ -53,6 +55,12 @@ export function NewApplicationTemplate({
       <div className={styles.centered}>
         <h3 className={styles.title}>Nouvelle candidature</h3>
 
+        {error ? (
+          <div className={styles.error} role="alert">
+            {error}
+          </div>
+        ) : null}
+
         <form
           className={styles.form}
           onSubmit={(event) => {
@@ -63,6 +71,7 @@ export function NewApplicationTemplate({
           <div className={styles.row}>
             <FormField id="company" label="Entreprise">
               <Input
+                required
                 placeholder="ex. Solstice Labs"
                 value={company}
                 onChange={(event: ChangeEvent<HTMLInputElement>) => onCompanyChange(event.target.value)}
@@ -70,6 +79,7 @@ export function NewApplicationTemplate({
             </FormField>
             <FormField id="position" label="Poste">
               <Input
+                required
                 placeholder="ex. Ingénieur Backend"
                 value={position}
                 onChange={(event: ChangeEvent<HTMLInputElement>) => onPositionChange(event.target.value)}
