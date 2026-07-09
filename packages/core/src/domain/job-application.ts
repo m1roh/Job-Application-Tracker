@@ -34,6 +34,8 @@ const VALID_TRANSITIONS: Record<ApplicationStatus, ApplicationStatus[]> = {
 
 const STATUSES_ALLOWING_FOLLOW_UP: ApplicationStatus[] = ["application_sent", "follow_up_sent"];
 
+export const APPLICATION_STATUSES = Object.keys(VALID_TRANSITIONS) as ApplicationStatus[];
+
 type JobApplicationProps = {
   id: JobApplicationId;
   company: CompanyName;

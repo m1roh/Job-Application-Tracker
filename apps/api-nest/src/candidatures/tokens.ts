@@ -1,0 +1,2 @@
+export const CLOCK = Symbol("CLOCK");
+export const JOB_APPLICATION_REPOSITORY = Symbol("JOB_APPLICATION_REPOSITORY");

@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { JobApplication, type ApplicationStatus, type JobApplicationSnapshot } from "./job-application";
+import {
+  APPLICATION_STATUSES,
+  JobApplication,
+  type ApplicationStatus,
+  type JobApplicationSnapshot,
+} from "./job-application";
 import { CompanyName } from "./value-objects/company-name";
 import { JobApplicationId } from "./value-objects/job-application-id";
 
@@ -59,6 +64,26 @@ function moveTo(status: ApplicationStatus, params = createParams()): JobApplicat
   }
   return application;
 }
+
+describe("APPLICATION_STATUSES", () => {
+  it("lists exactly the 10 known application statuses", () => {
+    expect(APPLICATION_STATUSES).toHaveLength(10);
+    expect(new Set(APPLICATION_STATUSES)).toEqual(
+      new Set<ApplicationStatus>([
+        "to_contact",
+        "offer_open",
+        "application_sent",
+        "follow_up_sent",
+        "hr_interview",
+        "technical_interview",
+        "offer_received",
+        "rejected",
+        "on_hold",
+        "withdrawn",
+      ]),
+    );
+  });
+});
 
 describe("JobApplication", () => {
   describe("create (invalid cases)", () => {
