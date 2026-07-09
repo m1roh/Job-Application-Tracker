@@ -22,6 +22,8 @@ const meta: Meta<typeof ApplicationDetailTemplate> = {
     followUpDefaultValue: "2026-07-20",
     pendingFollowUp: false,
     onPlanFollowUp: fn(),
+    pendingDelete: false,
+    onDelete: fn(),
     offerUrl: "https://example.com/offres/nova-tech",
     notes: "Contact via une ancienne collègue (Camille). Process en 3 étapes : RH → technique → CEO.",
     history: [

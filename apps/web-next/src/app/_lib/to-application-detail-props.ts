@@ -17,7 +17,13 @@ function assertKnownStatus(status: string): asserts status is StatusKey {
 
 export type ApplicationDetailProps = Omit<
   ApplicationDetailPanelProps,
-  "pendingStatus" | "onStatusSelect" | "followUpDefaultValue" | "pendingFollowUp" | "onPlanFollowUp"
+  | "pendingStatus"
+  | "onStatusSelect"
+  | "followUpDefaultValue"
+  | "pendingFollowUp"
+  | "onPlanFollowUp"
+  | "pendingDelete"
+  | "onDelete"
 > & {
   id: string;
 };

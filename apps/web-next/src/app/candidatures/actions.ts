@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { ChangeApplicationStatusUseCase } from "@job-tracker/core/application/use-cases/change-application-status";
 import { CreateJobApplicationUseCase } from "@job-tracker/core/application/use-cases/create-job-application";
+import { DeleteJobApplicationUseCase } from "@job-tracker/core/application/use-cases/delete-job-application";
 import { GetJobApplicationUseCase } from "@job-tracker/core/application/use-cases/get-job-application";
 import { ListJobApplicationsUseCase } from "@job-tracker/core/application/use-cases/list-job-applications";
 import { PlanFollowUpUseCase } from "@job-tracker/core/application/use-cases/plan-follow-up";
@@ -89,6 +90,24 @@ export async function planFollowUpAction(id: string, date: Date): Promise<PlanFo
     revalidatePath(`/candidatures/${id}`);
 
     return { nextFollowUpLabel: formatDate(application.nextFollowUp!) };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Une erreur est survenue." };
+  }
+}
+
+export type DeleteJobApplicationResult = { success: true } | { error: string };
+
+export async function deleteJobApplicationAction(id: string): Promise<DeleteJobApplicationResult> {
+  try {
+    const collection = await getJobApplicationsCollection();
+    const repository = new MongoJobApplicationRepository(collection);
+    const useCase = new DeleteJobApplicationUseCase(repository);
+
+    await useCase.execute(JobApplicationId.from(id));
+
+    revalidatePath("/");
+
+    return { success: true };
   } catch (error) {
     return { error: error instanceof Error ? error.message : "Une erreur est survenue." };
   }

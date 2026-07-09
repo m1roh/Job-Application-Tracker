@@ -17,6 +17,8 @@ const meta: Meta<typeof ApplicationDetailPanel> = {
     followUpDefaultValue: "2026-07-20",
     pendingFollowUp: false,
     onPlanFollowUp: fn(),
+    pendingDelete: false,
+    onDelete: fn(),
     offerUrl: "https://example.com/offres/nova-tech",
     notes: "Contact via une ancienne collègue (Camille). Process en 3 étapes : RH → technique → CEO.",
     history: [
@@ -92,10 +94,14 @@ export const Sent: Story = {
 
     await userEvent.click(canvas.getByRole("button", { name: "Planifier" }));
     await expect(args.onPlanFollowUp).toHaveBeenCalledWith(new Date("2026-07-20T00:00:00.000Z"));
+
+    await userEvent.click(canvas.getByRole("button", { name: "Supprimer la candidature" }));
+    await userEvent.click(canvas.getByRole("button", { name: "Confirmer" }));
+    await expect(args.onDelete).toHaveBeenCalledOnce();
   },
 };
 
-export const TerminalStatusHasNoActions: Story = {
+export const TerminalStatusHasNoStatusActions: Story = {
   args: {
     status: "rejected",
     canPlanFollowUp: false,
@@ -103,7 +109,9 @@ export const TerminalStatusHasNoActions: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.queryByRole("button")).not.toBeInTheDocument();
+    await expect(canvas.queryByRole("button", { name: "Entretien RH" })).not.toBeInTheDocument();
+    await expect(canvas.queryByRole("button", { name: "Refusé" })).not.toBeInTheDocument();
+    await expect(canvas.getByRole("button", { name: "Supprimer la candidature" })).toBeInTheDocument();
   },
 };
 

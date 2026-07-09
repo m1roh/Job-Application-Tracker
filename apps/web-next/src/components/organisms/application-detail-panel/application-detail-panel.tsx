@@ -1,6 +1,7 @@
 import { statusColors, type StatusKey } from "@job-tracker/design-tokens";
 import { CompanyAvatar } from "../../atoms/company-avatar/company-avatar";
 import { StatusBadge } from "../../molecules/status-badge/status-badge";
+import { DeleteApplicationAction } from "../delete-application-action/delete-application-action";
 import { FollowUpPicker } from "../follow-up-picker/follow-up-picker";
 import { StatusActions, type StatusActionItem } from "../status-actions/status-actions";
 import styles from "./application-detail-panel.module.css";
@@ -22,6 +23,8 @@ export type ApplicationDetailPanelProps = {
   followUpDefaultValue: string;
   pendingFollowUp: boolean;
   onPlanFollowUp: (date: Date) => void;
+  pendingDelete: boolean;
+  onDelete: () => void;
   offerUrl: string | null;
   notes: string;
   history: HistoryEntry[];
@@ -41,6 +44,8 @@ export function ApplicationDetailPanel({
   followUpDefaultValue,
   pendingFollowUp,
   onPlanFollowUp,
+  pendingDelete,
+  onDelete,
   offerUrl,
   notes,
   history,
@@ -96,6 +101,10 @@ export function ApplicationDetailPanel({
 
         <div className={styles.notesLabel}>Notes</div>
         <div className={styles.notes}>{notes}</div>
+
+        <div className={styles.deleteSlot}>
+          <DeleteApplicationAction pending={pendingDelete} onDelete={onDelete} />
+        </div>
       </div>
 
       <div>

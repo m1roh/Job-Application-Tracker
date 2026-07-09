@@ -4,6 +4,7 @@ const findMock = vi.fn();
 const toArrayMock = vi.fn();
 const replaceOneMock = vi.fn();
 const findOneMock = vi.fn();
+const deleteOneMock = vi.fn();
 const revalidatePathMock = vi.fn();
 
 vi.mock("../../server/mongodb", () => ({
@@ -11,6 +12,7 @@ vi.mock("../../server/mongodb", () => ({
     find: findMock,
     replaceOne: replaceOneMock,
     findOne: findOneMock,
+    deleteOne: deleteOneMock,
   }),
 }));
 
@@ -302,6 +304,48 @@ describe("planFollowUpAction", () => {
 
       expect(result).toEqual({ error: "Une erreur est survenue." });
     });
+  });
+});
+
+describe("deleteJobApplicationAction", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.clearAllMocks();
+    deleteOneMock.mockResolvedValue({});
+  });
+
+  afterEach(() => {
+    process.env = { ...originalEnv };
+  });
+
+  it("returns an error for a malformed id, without deleting anything", async () => {
+    const { deleteJobApplicationAction } = await import("./actions");
+
+    const result = await deleteJobApplicationAction("not-a-uuid");
+
+    expect(result).toHaveProperty("error");
+    expect(deleteOneMock).not.toHaveBeenCalled();
+    expect(revalidatePathMock).not.toHaveBeenCalled();
+  });
+
+  it("deletes the application and revalidates the dashboard on success", async () => {
+    const { deleteJobApplicationAction } = await import("./actions");
+    const id = "9c858901-8a57-4791-81fe-4c455b099bc9";
+
+    const result = await deleteJobApplicationAction(id);
+
+    expect(result).toEqual({ success: true });
+    expect(deleteOneMock).toHaveBeenCalledOnce();
+    expect(revalidatePathMock).toHaveBeenCalledWith("/");
+  });
+
+  it("falls back to a generic message when something other than an Error is thrown", async () => {
+    deleteOneMock.mockRejectedValueOnce("a non-Error rejection");
+    const { deleteJobApplicationAction } = await import("./actions");
+
+    const result = await deleteJobApplicationAction("9c858901-8a57-4791-81fe-4c455b099bc9");
+
+    expect(result).toEqual({ error: "Une erreur est survenue." });
   });
 });
 

@@ -8,7 +8,7 @@ import {
   type ApplicationDetailTemplateProps,
 } from "../../../../components/templates/application-detail/application-detail-template";
 import type { NavTab } from "../../../../components/organisms/header-nav/header-nav";
-import { changeApplicationStatusAction, planFollowUpAction } from "../../actions";
+import { changeApplicationStatusAction, deleteJobApplicationAction, planFollowUpAction } from "../../actions";
 
 const NAV_ROUTES: Record<NavTab, string> = {
   dashboard: "/",
@@ -35,6 +35,8 @@ export type ApplicationDetailClientProps = Omit<
   | "followUpDefaultValue"
   | "pendingFollowUp"
   | "onPlanFollowUp"
+  | "pendingDelete"
+  | "onDelete"
 > & { id: string };
 
 export function ApplicationDetailClient({ id, ...panelProps }: ApplicationDetailClientProps) {
@@ -42,6 +44,7 @@ export function ApplicationDetailClient({ id, ...panelProps }: ApplicationDetail
   const [isPending, startTransition] = useTransition();
   const [pendingStatus, setPendingStatus] = useState<StatusKey | null>(null);
   const [isFollowUpPending, startFollowUpTransition] = useTransition();
+  const [isDeletePending, startDeleteTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleStatusSelect = (status: StatusKey) => {
@@ -77,6 +80,21 @@ export function ApplicationDetailClient({ id, ...panelProps }: ApplicationDetail
     });
   };
 
+  const handleDelete = () => {
+    setErrorMessage(null);
+
+    startDeleteTransition(async () => {
+      const result = await deleteJobApplicationAction(id);
+
+      if ("error" in result) {
+        setErrorMessage(result.error);
+        return;
+      }
+
+      router.push("/");
+    });
+  };
+
   return (
     <>
       <ApplicationDetailTemplate
@@ -90,6 +108,8 @@ export function ApplicationDetailClient({ id, ...panelProps }: ApplicationDetail
         followUpDefaultValue={defaultFollowUpValue()}
         pendingFollowUp={isFollowUpPending}
         onPlanFollowUp={handlePlanFollowUp}
+        pendingDelete={isDeletePending}
+        onDelete={handleDelete}
       />
       {errorMessage ? <p style={{ color: "var(--color-destructive)" }}>{errorMessage}</p> : null}
     </>
