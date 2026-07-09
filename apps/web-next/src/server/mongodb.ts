@@ -1,8 +1,10 @@
 import { MongoClient, type Collection } from "mongodb";
-import type { JobApplicationDocument } from "@job-tracker/infrastructure/repositories/job-application-repository.mongodb";
+import {
+  JOB_APPLICATIONS_COLLECTION_NAME,
+  type JobApplicationDocument,
+} from "@job-tracker/infrastructure/repositories/job-application-repository.mongodb";
 
 declare global {
-  // eslint-disable-next-line no-var
   var __mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
@@ -32,5 +34,5 @@ export async function getJobApplicationsCollection(): Promise<Collection<JobAppl
   const { uri, dbName } = getRequiredEnv();
   const client = await getClientPromise(uri);
 
-  return client.db(dbName).collection<JobApplicationDocument>("job-applications");
+  return client.db(dbName).collection<JobApplicationDocument>(JOB_APPLICATIONS_COLLECTION_NAME);
 }

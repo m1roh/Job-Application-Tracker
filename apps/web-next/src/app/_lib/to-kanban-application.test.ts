@@ -36,7 +36,9 @@ describe("toKanbanApplication", () => {
 
   it("throws for an unrecognized status (corrupted data)", () => {
     const application = buildApplication({ status: "made_up_status" as JobApplicationSnapshot["status"] });
-    expect(() => toKanbanApplication(application)).toThrow("Invalid JobApplication: unrecognized status made_up_status");
+    expect(() => toKanbanApplication(application)).toThrow(
+      "Invalid JobApplication: unrecognized status made_up_status",
+    );
   });
 
   it("has no dateLabel for to_contact", () => {
@@ -119,7 +121,11 @@ describe("toKanbanApplication", () => {
     const application = buildApplication({
       status: "technical_interview",
       history: [
-        { previousStatus: "hr_interview", newStatus: "technical_interview", date: new Date("2026-07-04T10:00:00.000Z") },
+        {
+          previousStatus: "hr_interview",
+          newStatus: "technical_interview",
+          date: new Date("2026-07-04T10:00:00.000Z"),
+        },
       ],
     });
     expect(toKanbanApplication(application).dateLabel).toBe("Entretien technique le 4 juillet 2026");
@@ -142,9 +148,7 @@ describe("toKanbanApplication", () => {
   it("labels rejected with the date it was reached", () => {
     const application = buildApplication({
       status: "rejected",
-      history: [
-        { previousStatus: "hr_interview", newStatus: "rejected", date: new Date("2026-06-10T10:00:00.000Z") },
-      ],
+      history: [{ previousStatus: "hr_interview", newStatus: "rejected", date: new Date("2026-06-10T10:00:00.000Z") }],
     });
     expect(toKanbanApplication(application).dateLabel).toBe("Refus le 10 juin 2026");
   });
@@ -162,9 +166,7 @@ describe("toKanbanApplication", () => {
   it("labels withdrawn with the date it was reached", () => {
     const application = buildApplication({
       status: "withdrawn",
-      history: [
-        { previousStatus: "to_contact", newStatus: "withdrawn", date: new Date("2026-04-01T10:00:00.000Z") },
-      ],
+      history: [{ previousStatus: "to_contact", newStatus: "withdrawn", date: new Date("2026-04-01T10:00:00.000Z") }],
     });
     expect(toKanbanApplication(application).dateLabel).toBe("Abandonnée le 1 avril 2026");
   });

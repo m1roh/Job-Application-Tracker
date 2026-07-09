@@ -2,8 +2,13 @@ import type { ApplicationStatus, JobApplicationSnapshot, StatusChange } from "@j
 import { JobApplication } from "@job-tracker/core/domain/job-application";
 import { CompanyName } from "@job-tracker/core/domain/value-objects/company-name";
 import { JobApplicationId } from "@job-tracker/core/domain/value-objects/job-application-id";
-import type { ApplicationFilter, JobApplicationRepository } from "@job-tracker/core/application/ports/job-application-repository";
+import type {
+  ApplicationFilter,
+  JobApplicationRepository,
+} from "@job-tracker/core/application/ports/job-application-repository";
 import type { Collection, Filter } from "mongodb";
+
+export const JOB_APPLICATIONS_COLLECTION_NAME = "job-applications";
 
 export type JobApplicationDocument = {
   _id: string;
@@ -18,30 +23,34 @@ export type JobApplicationDocument = {
 };
 
 function toDocument(application: JobApplication): JobApplicationDocument {
+  const { position, status, applicationDate, nextFollowUp, offerUrl, notes, history } = application;
+
   return {
     _id: application.id.toString(),
     company: application.company.toString(),
-    position: application.position,
-    status: application.status,
-    applicationDate: application.applicationDate,
-    nextFollowUp: application.nextFollowUp,
-    offerUrl: application.offerUrl,
-    notes: application.notes,
-    history: application.history,
+    position,
+    status,
+    applicationDate,
+    nextFollowUp,
+    offerUrl,
+    notes,
+    history,
   };
 }
 
 function toDomain(document: JobApplicationDocument): JobApplication {
+  const { _id, company, position, status, applicationDate, nextFollowUp, offerUrl, notes, history } = document;
+
   const snapshot: JobApplicationSnapshot = {
-    id: JobApplicationId.from(document._id),
-    company: CompanyName.from(document.company),
-    position: document.position,
-    status: document.status,
-    applicationDate: document.applicationDate,
-    nextFollowUp: document.nextFollowUp,
-    offerUrl: document.offerUrl,
-    notes: document.notes,
-    history: document.history,
+    id: JobApplicationId.from(_id),
+    company: CompanyName.from(company),
+    position,
+    status,
+    applicationDate,
+    nextFollowUp,
+    offerUrl,
+    notes,
+    history,
   };
 
   return JobApplication.reconstitute(snapshot);

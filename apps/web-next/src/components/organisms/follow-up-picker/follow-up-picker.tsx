@@ -12,6 +12,8 @@ export type FollowUpPickerProps = {
   onSubmit: (date: Date) => void;
 };
 
+const UTC_MIDNIGHT_SUFFIX = "T00:00:00.000Z";
+
 export function FollowUpPicker({ defaultValue, pending, onSubmit }: FollowUpPickerProps) {
   const [value, setValue] = useState(defaultValue);
 
@@ -25,7 +27,7 @@ export function FollowUpPicker({ defaultValue, pending, onSubmit }: FollowUpPick
         variant="secondary"
         size="small"
         disabled={pending || value === ""}
-        onClick={() => onSubmit(new Date(`${value}T00:00:00.000Z`))}
+        onClick={() => onSubmit(new Date(`${value}${UTC_MIDNIGHT_SUFFIX}`))}
       >
         Planifier
       </Button>

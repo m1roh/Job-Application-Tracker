@@ -5,8 +5,10 @@ export type NewApplicationInput = {
   position: string;
 };
 
+const RANDOM_SUFFIX_MAX = 10_000;
+
 export function uniqueCompanyName(prefix: string): string {
-  return `${prefix} ${Date.now()}-${Math.floor(Math.random() * 10_000)}`;
+  return `${prefix} ${Date.now()}-${Math.floor(Math.random() * RANDOM_SUFFIX_MAX)}`;
 }
 
 export async function createApplication(page: Page, input: NewApplicationInput): Promise<void> {

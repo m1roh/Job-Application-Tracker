@@ -7,6 +7,7 @@ const NOT_ACTIVE: ApplicationStatus[] = ["rejected", "withdrawn", "offer_receive
 const INTERVIEW_STATUSES: ApplicationStatus[] = ["hr_interview", "technical_interview"];
 const NOT_SENT_YET: ApplicationStatus[] = ["to_contact", "offer_open"];
 const PRE_RESPONSE_STATUSES: ApplicationStatus[] = [...NOT_SENT_YET, "application_sent"];
+const PERCENTAGE_MULTIPLIER = 100;
 
 function assertValid(applications: JobApplication[]): void {
   const seenIds = new Set<string>();
@@ -36,7 +37,7 @@ export function toStatItems(applications: JobApplication[]): StatItem[] {
   const respondedCount = applications.filter(
     (application) => !PRE_RESPONSE_STATUSES.includes(application.status),
   ).length;
-  const responseRate = sentCount === 0 ? "—" : `${Math.round((respondedCount / sentCount) * 100)}%`;
+  const responseRate = sentCount === 0 ? "—" : `${Math.round((respondedCount / sentCount) * PERCENTAGE_MULTIPLIER)}%`;
 
   return [
     { label: "Candidatures actives", value: activeCount },

@@ -1,4 +1,5 @@
 const MAX_LENGTH = 200;
+// eslint-disable-next-line no-control-regex -- intentional: rejects control characters in user input (security, section 10 of the design doc)
 const CONTROL_CHAR_PATTERN = /[\x00-\x1F\x7F]/;
 
 export class CompanyName {

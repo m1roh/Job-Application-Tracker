@@ -14,6 +14,12 @@ import { SystemClock } from "@job-tracker/infrastructure/services/clock.impl";
 import { formatDate } from "../_lib/format-date";
 import { getJobApplicationsCollection } from "../../server/mongodb";
 
+const GENERIC_ERROR_MESSAGE = "Une erreur est survenue.";
+
+function toErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : GENERIC_ERROR_MESSAGE;
+}
+
 export async function listJobApplicationsAction(): Promise<JobApplication[]> {
   const collection = await getJobApplicationsCollection();
   const repository = new MongoJobApplicationRepository(collection);
@@ -50,7 +56,7 @@ export async function createJobApplicationAction(
 
     return { id: application.id.toString() };
   } catch (error) {
-    return { error: error instanceof Error ? error.message : "Une erreur est survenue." };
+    return { error: toErrorMessage(error) };
   }
 }
 
@@ -72,7 +78,7 @@ export async function changeApplicationStatusAction(
 
     return { status: application.status };
   } catch (error) {
-    return { error: error instanceof Error ? error.message : "Une erreur est survenue." };
+    return { error: toErrorMessage(error) };
   }
 }
 
@@ -91,7 +97,7 @@ export async function planFollowUpAction(id: string, date: Date): Promise<PlanFo
 
     return { nextFollowUpLabel: formatDate(application.nextFollowUp!) };
   } catch (error) {
-    return { error: error instanceof Error ? error.message : "Une erreur est survenue." };
+    return { error: toErrorMessage(error) };
   }
 }
 
@@ -109,7 +115,7 @@ export async function deleteJobApplicationAction(id: string): Promise<DeleteJobA
 
     return { success: true };
   } catch (error) {
-    return { error: error instanceof Error ? error.message : "Une erreur est survenue." };
+    return { error: toErrorMessage(error) };
   }
 }
 

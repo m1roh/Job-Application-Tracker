@@ -17,17 +17,13 @@ describe("CreateJobApplicationUseCase", () => {
     it("rejects an empty company name", async () => {
       const { useCase } = setup();
 
-      await expect(
-        useCase.execute({ company: "", position: "Backend Engineer" }),
-      ).rejects.toThrow();
+      await expect(useCase.execute({ company: "", position: "Backend Engineer" })).rejects.toThrow();
     });
 
     it("rejects an empty position", async () => {
       const { useCase } = setup();
 
-      await expect(
-        useCase.execute({ company: "Acme Corp", position: "" }),
-      ).rejects.toThrow();
+      await expect(useCase.execute({ company: "Acme Corp", position: "" })).rejects.toThrow();
     });
 
     it("rejects an applicationDate in the future", async () => {

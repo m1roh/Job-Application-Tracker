@@ -22,11 +22,7 @@ export function Badge({
   const classes = [styles.badge, className].filter(Boolean).join(" ");
 
   return (
-    <span
-      className={classes}
-      style={{ color: textColor, backgroundColor, borderColor, ...style }}
-      {...rest}
-    >
+    <span className={classes} style={{ color: textColor, backgroundColor, borderColor, ...style }} {...rest}>
       {dotColor ? <span className={styles.dot} style={{ backgroundColor: dotColor }} /> : null}
       {children}
     </span>

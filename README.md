@@ -24,18 +24,18 @@ Concrètement, ça veut dire : le domaine métier (`packages/core`) ne dépend d
 
 ## Stack
 
-| Domaine | Choix |
-|---|---|
-| Langage | TypeScript partout |
-| Monorepo | pnpm workspaces |
-| App 1 | Next.js (App Router) + React, Server Actions vers les use cases |
-| App 2 | NestJS (API REST) + Angular (dernière version) |
-| Domaine partagé | `packages/core` — zéro dépendance framework |
-| Infrastructure partagée | `packages/infrastructure` — adapters MongoDB (driver natif, pas d'ODM) |
-| Design system partagé | `packages/design-tokens` |
-| Tests | Vitest partout, sauf NestJS (Jest, idiomatique côté Nest) |
-| Composants | Atomic Design + Storybook (`@storybook/addon-vitest`) sur les deux frontends |
-| Persistance | MongoDB |
+| Domaine                 | Choix                                                                        |
+| ----------------------- | ---------------------------------------------------------------------------- |
+| Langage                 | TypeScript partout                                                           |
+| Monorepo                | pnpm workspaces                                                              |
+| App 1                   | Next.js (App Router) + React, Server Actions vers les use cases              |
+| App 2                   | NestJS (API REST) + Angular (dernière version)                               |
+| Domaine partagé         | `packages/core` — zéro dépendance framework                                  |
+| Infrastructure partagée | `packages/infrastructure` — adapters MongoDB (driver natif, pas d'ODM)       |
+| Design system partagé   | `packages/design-tokens`                                                     |
+| Tests                   | Vitest partout, sauf NestJS (Jest, idiomatique côté Nest)                    |
+| Composants              | Atomic Design + Storybook (`@storybook/addon-vitest`) sur les deux frontends |
+| Persistance             | MongoDB                                                                      |
 
 Le détail complet (règles métier, transitions de statut, ports/adapters, roadmap) est dans [`docs/job-tracker-architecture.md`](docs/job-tracker-architecture.md).
 

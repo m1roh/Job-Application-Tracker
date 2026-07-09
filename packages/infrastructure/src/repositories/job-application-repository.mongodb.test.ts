@@ -4,10 +4,7 @@ import { JobApplicationId } from "@job-tracker/core/domain/value-objects/job-app
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { MongoClient, type Collection } from "mongodb";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import {
-  MongoJobApplicationRepository,
-  type JobApplicationDocument,
-} from "./job-application-repository.mongodb";
+import { MongoJobApplicationRepository, type JobApplicationDocument } from "./job-application-repository.mongodb";
 
 const NOW = new Date("2026-07-02T10:00:00.000Z");
 

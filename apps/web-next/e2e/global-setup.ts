@@ -7,6 +7,7 @@ export const E2E_BASE_URL = `http://localhost:${E2E_PORT}`;
 
 const READY_TIMEOUT_MS = 60_000;
 const POLL_INTERVAL_MS = 300;
+const SERVER_ERROR_STATUS_THRESHOLD = 500;
 
 async function waitForServer(url: string, timeoutMs: number): Promise<void> {
   const start = Date.now();
@@ -14,7 +15,7 @@ async function waitForServer(url: string, timeoutMs: number): Promise<void> {
   while (Date.now() - start < timeoutMs) {
     try {
       const response = await fetch(url);
-      if (response.status < 500) {
+      if (response.status < SERVER_ERROR_STATUS_THRESHOLD) {
         return;
       }
     } catch {

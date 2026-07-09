@@ -7,6 +7,8 @@ import styles from "./search-and-filters.module.css";
 
 export type SortOrder = "recent" | "oldest";
 
+const SEARCH_INPUT_ICON_PADDING = 32;
+
 export type SearchAndFiltersProps = {
   searchValue: string;
   onSearchChange: (value: string) => void;
@@ -29,7 +31,11 @@ export function SearchAndFilters({
   onSortOrderChange,
 }: SearchAndFiltersProps) {
   const isStatusFilterActive = statusFilter !== "all";
-  const activeStyle = { borderColor: "var(--color-accent-surface-border)", background: "var(--color-accent-surface)", color: "var(--color-accent)" };
+  const activeStyle = {
+    borderColor: "var(--color-accent-surface-border)",
+    background: "var(--color-accent-surface)",
+    color: "var(--color-accent)",
+  };
 
   return (
     <div className={styles.bar}>
@@ -43,7 +49,7 @@ export function SearchAndFilters({
           placeholder="Rechercher une entreprise, un poste…"
           value={searchValue}
           onChange={(event: ChangeEvent<HTMLInputElement>) => onSearchChange(event.target.value)}
-          style={{ paddingLeft: 32 }}
+          style={{ paddingLeft: SEARCH_INPUT_ICON_PADDING }}
         />
       </div>
 

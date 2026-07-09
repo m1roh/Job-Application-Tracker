@@ -1,4 +1,7 @@
-import type { ApplicationFilter, JobApplicationRepository } from "@job-tracker/core/application/ports/job-application-repository";
+import type {
+  ApplicationFilter,
+  JobApplicationRepository,
+} from "@job-tracker/core/application/ports/job-application-repository";
 import type { JobApplication } from "@job-tracker/core/domain/job-application";
 import type { JobApplicationId } from "@job-tracker/core/domain/value-objects/job-application-id";
 

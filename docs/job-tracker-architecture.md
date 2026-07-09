@@ -4,30 +4,30 @@
 
 **Deux implémentations, un seul domaine.** Le projet expose la même logique métier via deux frameworks différents — c'est la meilleure preuve concrète de ce que promet l'architecture hexagonale.
 
-| Domaine | Choix | Raison |
-|---|---|---|
-| Langage | TypeScript (partout) | Cohérence sur tout le monorepo |
-| Monorepo | pnpm workspaces | Permet de partager `packages/core` et `packages/infrastructure` entre les deux apps sans dupliquer de code |
-| **App 1 — Framework** | Next.js (App Router) | Décidé en amont du projet |
-| **App 1 — UI** | React | Décidé en amont du projet |
-| **App 1 — UI ↔ use cases** | Server Actions | Plus simple pour un projet solo (cf. section 6) |
-| **App 2 — Backend** | NestJS | Refresh de compétence + contraste architectural intéressant (contrôleurs REST comme adapter piloté) |
-| **App 2 — Frontend** | Angular (dernière version) | Refresh de compétence demandé |
-| Tests / TDD — domaine et core | Vitest | Rapide, framework-agnostic |
-| Tests / TDD — Next.js | Vitest | Standard actuel de l'écosystème Next.js/Vite |
-| Tests / TDD — Angular | Vitest | **Angular a changé son défaut** : depuis Angular 21 (stable en Angular 22, juin 2026), Vitest remplace Karma/Jasmine comme testeur par défaut. Bonne nouvelle : toute ta stack tourne sur le même outil de test, sauf NestJS |
-| Tests / TDD — NestJS | Jest | Reste l'outil idiomatique par défaut de NestJS — pas de raison de forcer Vitest ici, ça ne touche que la glue applicative, pas le domaine partagé |
-| Persistance | MongoDB | Modèle document adapté à l'agrégat `Candidature` (cf. section 5), expérience déjà solide dessus, **partagé entre les deux apps** |
-| Accès MongoDB | Driver natif (`mongodb`), pas d'ODM | Reste au plus près du hexagonal pur — le mapping domaine ↔ document se fait explicitement dans l'adapter, sans magie de schéma cachée par un ODM |
-| Node.js | 20 LTS minimum recommandé | Cohérent avec les exigences actuelles de Next.js/NestJS/Vitest |
-| Composants UI | Atomic Design (atoms / molecules / organisms) | Structure identique sur les deux apps, même si le code des composants n'est pas partageable entre React et Angular |
-| Design tokens | Package partagé `packages/design-tokens` (JSON/CSS custom properties) | Couleurs, espacements, typographie — partagés entre Next.js et Angular. Ce sont des données, pas du code framework-spécifique, donc ça respecte la même logique que `packages/core` : ce qui peut être partagé sans dépendance à un framework l'est |
-| Documentation composants | Storybook, sur les deux apps | Développement isolé des atoms/molecules/organisms, indépendamment des pages ; catalogue visuel réutilisable pour du contenu LinkedIn |
-| Tests frontend | Storybook Test (`@storybook/addon-vitest`) — les stories deviennent des tests Vitest exécutables | Une story avec une fonction `play` sert à la fois de documentation visuelle et de test d'interaction — pas de duplication entre Storybook et une suite de tests séparée. Fonctionne pareil sur React et Angular (via `@analogjs/storybook-angular` côté Angular) |
-| Accessibilité | `@storybook/addon-a11y` (axe-core, WCAG) | S'intègre nativement à l'addon Vitest déjà choisi — les vérifications a11y tournent dans les mêmes tests que les stories, pas d'outil séparé. Détecte automatiquement ~57% des problèmes WCAG (contraste, rôles ARIA manquants, etc.) |
-| Documentation frontend | Storybook Autodocs + MDX | Doc générée automatiquement depuis les stories (props, variantes) pour chaque atom/molecule/organism, complétée par des pages MDX pour les guidelines transverses (principes d'accessibilité, règles d'usage du design system) |
-| Tests visuels (régression) | `@chromatic-com/storybook` (Chromatic) | Détecte les régressions pixel par pixel (couleur, layout) que les tests d'interaction et d'accessibilité ne couvrent pas. Service cloud externe, compte à créer, palier gratuit pour un usage perso |
-| Couverture de code | Coverage natif de l'addon Vitest (pas `@storybook/addon-coverage`) | Puisque le projet utilise déjà l'addon Vitest (section précédente), le coverage est inclus nativement — le paquet `@storybook/addon-coverage` séparé est fait pour l'ancien test-runner Jest+Playwright et serait redondant ici |
+| Domaine                       | Choix                                                                                            | Raison                                                                                                                                                                                                                                                           |
+| ----------------------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Langage                       | TypeScript (partout)                                                                             | Cohérence sur tout le monorepo                                                                                                                                                                                                                                   |
+| Monorepo                      | pnpm workspaces                                                                                  | Permet de partager `packages/core` et `packages/infrastructure` entre les deux apps sans dupliquer de code                                                                                                                                                       |
+| **App 1 — Framework**         | Next.js (App Router)                                                                             | Décidé en amont du projet                                                                                                                                                                                                                                        |
+| **App 1 — UI**                | React                                                                                            | Décidé en amont du projet                                                                                                                                                                                                                                        |
+| **App 1 — UI ↔ use cases**    | Server Actions                                                                                   | Plus simple pour un projet solo (cf. section 6)                                                                                                                                                                                                                  |
+| **App 2 — Backend**           | NestJS                                                                                           | Refresh de compétence + contraste architectural intéressant (contrôleurs REST comme adapter piloté)                                                                                                                                                              |
+| **App 2 — Frontend**          | Angular (dernière version)                                                                       | Refresh de compétence demandé                                                                                                                                                                                                                                    |
+| Tests / TDD — domaine et core | Vitest                                                                                           | Rapide, framework-agnostic                                                                                                                                                                                                                                       |
+| Tests / TDD — Next.js         | Vitest                                                                                           | Standard actuel de l'écosystème Next.js/Vite                                                                                                                                                                                                                     |
+| Tests / TDD — Angular         | Vitest                                                                                           | **Angular a changé son défaut** : depuis Angular 21 (stable en Angular 22, juin 2026), Vitest remplace Karma/Jasmine comme testeur par défaut. Bonne nouvelle : toute ta stack tourne sur le même outil de test, sauf NestJS                                     |
+| Tests / TDD — NestJS          | Jest                                                                                             | Reste l'outil idiomatique par défaut de NestJS — pas de raison de forcer Vitest ici, ça ne touche que la glue applicative, pas le domaine partagé                                                                                                                |
+| Persistance                   | MongoDB                                                                                          | Modèle document adapté à l'agrégat `Candidature` (cf. section 5), expérience déjà solide dessus, **partagé entre les deux apps**                                                                                                                                 |
+| Accès MongoDB                 | Driver natif (`mongodb`), pas d'ODM                                                              | Reste au plus près du hexagonal pur — le mapping domaine ↔ document se fait explicitement dans l'adapter, sans magie de schéma cachée par un ODM                                                                                                                 |
+| Node.js                       | 20 LTS minimum recommandé                                                                        | Cohérent avec les exigences actuelles de Next.js/NestJS/Vitest                                                                                                                                                                                                   |
+| Composants UI                 | Atomic Design (atoms / molecules / organisms)                                                    | Structure identique sur les deux apps, même si le code des composants n'est pas partageable entre React et Angular                                                                                                                                               |
+| Design tokens                 | Package partagé `packages/design-tokens` (JSON/CSS custom properties)                            | Couleurs, espacements, typographie — partagés entre Next.js et Angular. Ce sont des données, pas du code framework-spécifique, donc ça respecte la même logique que `packages/core` : ce qui peut être partagé sans dépendance à un framework l'est              |
+| Documentation composants      | Storybook, sur les deux apps                                                                     | Développement isolé des atoms/molecules/organisms, indépendamment des pages ; catalogue visuel réutilisable pour du contenu LinkedIn                                                                                                                             |
+| Tests frontend                | Storybook Test (`@storybook/addon-vitest`) — les stories deviennent des tests Vitest exécutables | Une story avec une fonction `play` sert à la fois de documentation visuelle et de test d'interaction — pas de duplication entre Storybook et une suite de tests séparée. Fonctionne pareil sur React et Angular (via `@analogjs/storybook-angular` côté Angular) |
+| Accessibilité                 | `@storybook/addon-a11y` (axe-core, WCAG)                                                         | S'intègre nativement à l'addon Vitest déjà choisi — les vérifications a11y tournent dans les mêmes tests que les stories, pas d'outil séparé. Détecte automatiquement ~57% des problèmes WCAG (contraste, rôles ARIA manquants, etc.)                            |
+| Documentation frontend        | Storybook Autodocs + MDX                                                                         | Doc générée automatiquement depuis les stories (props, variantes) pour chaque atom/molecule/organism, complétée par des pages MDX pour les guidelines transverses (principes d'accessibilité, règles d'usage du design system)                                   |
+| Tests visuels (régression)    | `@chromatic-com/storybook` (Chromatic)                                                           | Détecte les régressions pixel par pixel (couleur, layout) que les tests d'interaction et d'accessibilité ne couvrent pas. Service cloud externe, compte à créer, palier gratuit pour un usage perso                                                              |
+| Couverture de code            | Coverage natif de l'addon Vitest (pas `@storybook/addon-coverage`)                               | Puisque le projet utilise déjà l'addon Vitest (section précédente), le coverage est inclus nativement — le paquet `@storybook/addon-coverage` séparé est fait pour l'ancien test-runner Jest+Playwright et serait redondant ici                                  |
 
 **Note sur le driver MongoDB natif** : sans ODM, c'est à l'adapter (`candidature-repository.mongodb.ts`) de faire la conversion explicite entre l'entité `Candidature` du domaine et le document MongoDB stocké. Un peu plus de code à écrire au début, mais aucune fuite d'un concept d'infrastructure vers le domaine — et comme cet adapter est partagé entre Next.js et NestJS, tu ne l'écris qu'une seule fois.
 
@@ -149,12 +149,12 @@ interface HorlogeService {
 
 ## 5. Adapters (infrastructure — à implémenter en dernier, et PARTAGÉS entre les deux apps)
 
-| Port | Adapter MVP | Partagé ? |
-|---|---|---|
-| `CandidatureRepository` | Adapter en mémoire (tests) puis MongoDB | Oui — vit dans `packages/infrastructure`, utilisé tel quel par Next.js et NestJS |
-| `HorlogeService` | Implémentation simple `() => new Date()` | Oui — même raisonnement |
-| UI (driving adapter) App 1 | Server Actions Next.js | Non — spécifique à l'app Next.js |
-| UI (driving adapter) App 2 | Contrôleurs REST NestJS | Non — spécifique à l'app NestJS, consommés ensuite par le frontend Angular via HTTP |
+| Port                       | Adapter MVP                              | Partagé ?                                                                           |
+| -------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------- |
+| `CandidatureRepository`    | Adapter en mémoire (tests) puis MongoDB  | Oui — vit dans `packages/infrastructure`, utilisé tel quel par Next.js et NestJS    |
+| `HorlogeService`           | Implémentation simple `() => new Date()` | Oui — même raisonnement                                                             |
+| UI (driving adapter) App 1 | Server Actions Next.js                   | Non — spécifique à l'app Next.js                                                    |
+| UI (driving adapter) App 2 | Contrôleurs REST NestJS                  | Non — spécifique à l'app NestJS, consommés ensuite par le frontend Angular via HTTP |
 
 **Choix MongoDB** : l'entité `Candidature` est un agrégat avec un tableau `historique` imbriqué — structure naturellement adaptée au modèle document, sans jointure nécessaire. Ce choix reste un détail d'implémentation derrière le port `CandidatureRepository` : le changer plus tard n'impacterait ni le domaine ni les use cases, dans aucune des deux apps.
 
@@ -171,6 +171,7 @@ L'adapter en mémoire n'est pas un détail : c'est lui qui te permet de tester t
 **Décision UI → use cases App 2 (NestJS + Angular) : contrôleurs REST.** Ici pas le choix — Angular est un client séparé, il doit forcément parler HTTP à NestJS.
 
 Deux points de convention Next.js App Router à respecter (vérifiés sur la doc officielle, juin 2026) :
+
 - `app/layout.tsx` est **obligatoire**, pas optionnel — c'est le layout racine, il doit contenir `<html>` et `<body>`
 - Les dossiers non-routés à l'intérieur de `app/` (composants co-localisés) doivent être préfixés d'un underscore (`_components`) pour ne pas être interprétés comme des routes
 
@@ -355,10 +356,10 @@ Ne commence jamais la phase B avant que la phase A soit complète et testée. C'
 
 Suggestion de séquence de prompts, un par étape ci-dessus — ne demande jamais "fais tout le projet" d'un coup, et surtout ne demande jamais les deux apps en même temps :
 
-1. *"Voici mon document de conception [colle la section 2]. Crée uniquement le value object CandidatureId avec son test, en TDD : écris d'abord le test, montre-le moi, puis implémente."*
-2. *"Maintenant l'entité Candidature avec les règles de transition de statut de la section 2. Teste d'abord les cas invalides (transition interdite) avant les cas valides."*
+1. _"Voici mon document de conception [colle la section 2]. Crée uniquement le value object CandidatureId avec son test, en TDD : écris d'abord le test, montre-le moi, puis implémente."_
+2. _"Maintenant l'entité Candidature avec les règles de transition de statut de la section 2. Teste d'abord les cas invalides (transition interdite) avant les cas valides."_
 3. Continue étape par étape en collant la section correspondante à chaque fois, jusqu'à la fin de la Phase A (section 7).
-4. Une fois la Phase A terminée et validée : *"packages/core et packages/infrastructure sont testés et complets. Maintenant, dans une session séparée, on attaque uniquement apps/web-next."* — puis fais de même plus tard pour `api-nest` et `web-angular` dans une nouvelle session dédiée.
+4. Une fois la Phase A terminée et validée : _"packages/core et packages/infrastructure sont testés et complets. Maintenant, dans une session séparée, on attaque uniquement apps/web-next."_ — puis fais de même plus tard pour `api-nest` et `web-angular` dans une nouvelle session dédiée.
 
 Utilise le **Plan Mode** de Claude Code sur les étapes 2, 5, et à chaque démarrage de nouvelle app (les moments les plus riches en décisions) pour valider son plan avant qu'il touche au code.
 
@@ -404,6 +405,7 @@ Pas d'auth pour le MVP ne veut pas dire pas de sécurité. Voici ce qui s'appliq
 ### Validation en profondeur (defense in depth)
 
 Deux couches, pas une seule :
+
 1. **Domaine** — les value objects (`NomEntreprise`, etc.) rejettent déjà les valeurs invalides à la construction. À étendre avec des limites de longueur et un refus des caractères de contrôle, pas seulement "non vide"
 2. **Adapters d'entrée** — les Server Actions (Next.js) et les DTOs NestJS (avec `class-validator`) valident la forme des données **avant** qu'elles atteignent le domaine. Le domaine ne doit jamais faire confiance à ce qui vient de l'extérieur, même si l'adapter a déjà validé — la validation domaine reste la dernière ligne de défense.
 
@@ -412,9 +414,10 @@ Ces deux couches se testent en TDD comme le reste : cas invalides d'abord (chaî
 ### Prévention des injections NoSQL
 
 Le driver MongoDB natif (décision de la section 0) aide déjà, à condition de respecter une règle stricte : **jamais de valeur utilisateur non typée directement dans un objet de requête**. Concrètement :
+
 - Ne jamais faire `collection.find(req.body)` ou équivalent — construire les filtres explicitement, champ par champ, avec des types connus
 - Aucune valeur ne doit pouvoir devenir un opérateur MongoDB (`$where`, `$ne`, etc.) — ce risque existe si un objet JSON brut venant du client est utilisé tel quel comme filtre de requête
-- Les DTOs NestJS et les Server Actions Next.js, en validant la *forme* des données (string attendu, pas objet), bloquent déjà une bonne partie de cette classe d'attaque
+- Les DTOs NestJS et les Server Actions Next.js, en validant la _forme_ des données (string attendu, pas objet), bloquent déjà une bonne partie de cette classe d'attaque
 
 ### Secrets et configuration
 
@@ -460,10 +463,10 @@ Pas d'authentification, pas de gestion de rôles — hors scope MVP (décidé en
 
 Deux workflows séparés, avec des runners différents et des déclencheurs différents — c'est la décision de sécurité la plus importante de cette section.
 
-| Workflow | Déclencheur | Runner | Rôle |
-|---|---|---|---|
-| `ci.yml` | `push` (toutes branches) + `pull_request` vers `main` | GitHub-hosted (`ubuntu-latest`) | Lint, format, typecheck, tests, build |
-| `deploy.yml` | `push` sur `main` uniquement | **Self-hosted** (home server) | Build des images Docker et déploiement |
+| Workflow     | Déclencheur                                           | Runner                          | Rôle                                   |
+| ------------ | ----------------------------------------------------- | ------------------------------- | -------------------------------------- |
+| `ci.yml`     | `push` (toutes branches) + `pull_request` vers `main` | GitHub-hosted (`ubuntu-latest`) | Lint, format, typecheck, tests, build  |
+| `deploy.yml` | `push` sur `main` uniquement                          | **Self-hosted** (home server)   | Build des images Docker et déploiement |
 
 **Règle de sécurité non négociable** : le runner self-hosted ne se déclenche jamais sur `pull_request`. Un repo public avec un runner self-hosted exposé aux PR permettrait à n'importe qui d'exécuter du code sur le réseau domestique via une PR malveillante. Le déploiement se déclenche uniquement après un `push` direct sur `main` — donc après qu'une PR a déjà été relue et mergée par toi.
 
@@ -508,6 +511,7 @@ Caddy (reverse proxy, TLS automatique via Let's Encrypt)
 ```
 
 **Règles de sécurité pour l'exposition publique (prolongement direct de la section 10) :**
+
 - Seul le port 443 (HTTPS) est redirigé sur le routeur — vers Caddy, rien d'autre
 - MongoDB reste sur le réseau Docker interne, jamais accessible depuis l'extérieur, même indirectement
 - Caddy gère la terminaison TLS automatiquement (certificat Let's Encrypt, renouvellement automatique)
@@ -544,6 +548,7 @@ Décidé mais volontairement **séquencé après** un premier déploiement fonct
 **Idée** : agrégation automatique d'offres depuis des plateformes sélectionnées par l'utilisateur, upload de CV, description des ambitions (poste, prétentions salariales, secteurs), suggestion automatique d'offres correspondantes, complétion voire candidature automatique, le tout propulsé par IA.
 
 **Pourquoi c'est noté ici et pas construit maintenant :**
+
 - Complexité d'un ordre de grandeur supérieur au MVP (intégrations multi-plateformes, parsing CV, matching IA, remplissage de formulaires tiers)
 - Risque concret : la plupart des plateformes emploi interdisent l'automatisation de candidatures dans leurs CGU — un compte personnel utilisé pour ça s'expose à un bannissement, au pire moment possible pendant une recherche d'emploi active
 - Coût d'opportunité : le temps disponible (déjà partagé entre recherche d'emploi, formation, OpenTiko) vaut mieux investi dans un MVP livré et solide que dans un projet ambitieux qui traîne inachevé
@@ -566,47 +571,47 @@ Un design system complet a été produit dans Claude Design ("JobTracker — Des
 
 **Couleurs neutres**
 
-| Token | Valeur OKLCH | Usage |
-|---|---|---|
-| Surface | `oklch(99% .002 250)` | Fond des cartes, inputs, header |
-| Fond de page | `oklch(97.5% .003 250)` | Arrière-plan général |
-| Bordure | `oklch(90% .004 250)` | Bordures standard |
-| Bordure input | `oklch(88% .005 250)` | Bordures de champs de formulaire |
-| Texte primaire | `oklch(22% .01 250)` | Texte principal |
-| Texte secondaire | `oklch(48% .01 250)` | Labels, texte atténué |
-| Texte label | `oklch(38% .01 250)` | Labels de formulaire |
-| Texte caption/meta | `oklch(55–58% .01 250)` | Dates, méta-infos |
-| Texte désactivé | `oklch(68% .006 250)` | Champs/boutons disabled |
-| Fond désactivé | `oklch(93–95% .003–.004 250)` | Champs/boutons disabled, hover |
-| Accent | `oklch(52% .17 262)` | Boutons primaires, liens, focus ring |
-| Accent hover | `oklch(46% .17 262)` | État hover de l'accent |
+| Token              | Valeur OKLCH                  | Usage                                |
+| ------------------ | ----------------------------- | ------------------------------------ |
+| Surface            | `oklch(99% .002 250)`         | Fond des cartes, inputs, header      |
+| Fond de page       | `oklch(97.5% .003 250)`       | Arrière-plan général                 |
+| Bordure            | `oklch(90% .004 250)`         | Bordures standard                    |
+| Bordure input      | `oklch(88% .005 250)`         | Bordures de champs de formulaire     |
+| Texte primaire     | `oklch(22% .01 250)`          | Texte principal                      |
+| Texte secondaire   | `oklch(48% .01 250)`          | Labels, texte atténué                |
+| Texte label        | `oklch(38% .01 250)`          | Labels de formulaire                 |
+| Texte caption/meta | `oklch(55–58% .01 250)`       | Dates, méta-infos                    |
+| Texte désactivé    | `oklch(68% .006 250)`         | Champs/boutons disabled              |
+| Fond désactivé     | `oklch(93–95% .003–.004 250)` | Champs/boutons disabled, hover       |
+| Accent             | `oklch(52% .17 262)`          | Boutons primaires, liens, focus ring |
+| Accent hover       | `oklch(46% .17 262)`          | État hover de l'accent               |
 
 **Couleurs de statut** — chaque statut a 4 variantes (texte / fond / bordure / pastille), et la clé correspond exactement à `StatutCandidature` (section 2) :
 
-| Statut (clé domaine) | Texte | Fond | Pastille |
-|---|---|---|---|
-| `a_contacter` | `oklch(35% .01 250)` | `oklch(95% .005 250)` | `oklch(55% .01 250)` |
-| `offre_ouverte` | `oklch(38% .08 235)` | `oklch(94% .025 235)` | `oklch(55% .09 235)` |
-| `candidature_envoyee` | `oklch(38% .14 255)` | `oklch(93% .035 255)` | `oklch(55% .16 255)` |
-| `relance_envoyee` | `oklch(38% .11 210)` | `oklch(93% .035 210)` | `oklch(58% .13 210)` |
-| `entretien_rh` | `oklch(38% .14 300)` | `oklch(93% .035 300)` | `oklch(55% .16 300)` |
-| `entretien_technique` | `oklch(38% .15 325)` | `oklch(93% .035 325)` | `oklch(55% .17 325)` |
-| `offre_recue` | `oklch(38% .12 145)` | `oklch(93% .045 145)` | `oklch(55% .14 145)` |
-| `refuse` | `oklch(40% .15 25)` | `oklch(93% .04 25)` | `oklch(55% .17 25)` |
-| `en_pause` | `oklch(40% .12 80)` | `oklch(93% .05 80)` | `oklch(60% .14 80)` |
-| `abandonne` | `oklch(30% .005 250)` | `oklch(92% .005 250)` | `oklch(45% .005 250)` |
+| Statut (clé domaine)  | Texte                 | Fond                  | Pastille              |
+| --------------------- | --------------------- | --------------------- | --------------------- |
+| `a_contacter`         | `oklch(35% .01 250)`  | `oklch(95% .005 250)` | `oklch(55% .01 250)`  |
+| `offre_ouverte`       | `oklch(38% .08 235)`  | `oklch(94% .025 235)` | `oklch(55% .09 235)`  |
+| `candidature_envoyee` | `oklch(38% .14 255)`  | `oklch(93% .035 255)` | `oklch(55% .16 255)`  |
+| `relance_envoyee`     | `oklch(38% .11 210)`  | `oklch(93% .035 210)` | `oklch(58% .13 210)`  |
+| `entretien_rh`        | `oklch(38% .14 300)`  | `oklch(93% .035 300)` | `oklch(55% .16 300)`  |
+| `entretien_technique` | `oklch(38% .15 325)`  | `oklch(93% .035 325)` | `oklch(55% .17 325)`  |
+| `offre_recue`         | `oklch(38% .12 145)`  | `oklch(93% .045 145)` | `oklch(55% .14 145)`  |
+| `refuse`              | `oklch(40% .15 25)`   | `oklch(93% .04 25)`   | `oklch(55% .17 25)`   |
+| `en_pause`            | `oklch(40% .12 80)`   | `oklch(93% .05 80)`   | `oklch(60% .14 80)`   |
+| `abandonne`           | `oklch(30% .005 250)` | `oklch(92% .005 250)` | `oklch(45% .005 250)` |
 
 Chaque statut a aussi une valeur de bordure (visible dans le HTML source, légèrement plus saturée que le fond) — à reprendre telle quelle depuis le fichier `.html` fourni plutôt que retranscrite ici pour éviter toute erreur de recopie.
 
 **Typographie** — police Inter (texte), JetBrains Mono (valeurs de tokens, labels techniques) :
 
-| Niveau | Poids | Taille (échelle atome) |
-|---|---|---|
-| H1 | 800 | 38px (52px en cover/hero) |
-| H2 | 700 | 26px |
-| H3 | 600 | 18px |
-| Body | 400 | 15px |
-| Caption | 500 | 12px, uppercase, letter-spacing 0.04em |
+| Niveau  | Poids | Taille (échelle atome)                 |
+| ------- | ----- | -------------------------------------- |
+| H1      | 800   | 38px (52px en cover/hero)              |
+| H2      | 700   | 26px                                   |
+| H3      | 600   | 18px                                   |
+| Body    | 400   | 15px                                   |
+| Caption | 500   | 12px, uppercase, letter-spacing 0.04em |
 
 **Rayons et hauteurs** — boutons : 40px (standard) / 32px (petit) / 36px (icône), border-radius 8px (7px pour le petit bouton) ; inputs : 42px de hauteur, border-radius 8px ; cartes : border-radius 10–16px ; badges/chips : border-radius 100px (pilule).
 

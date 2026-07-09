@@ -83,7 +83,11 @@ export function ApplicationDetailPanel({
             <div className={styles.metaValue}>{nextFollowUpLabel ?? "—"}</div>
             {canPlanFollowUp ? (
               <div className={styles.followUpPicker}>
-                <FollowUpPicker defaultValue={followUpDefaultValue} pending={pendingFollowUp} onSubmit={onPlanFollowUp} />
+                <FollowUpPicker
+                  defaultValue={followUpDefaultValue}
+                  pending={pendingFollowUp}
+                  onSubmit={onPlanFollowUp}
+                />
               </div>
             ) : null}
           </div>

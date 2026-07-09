@@ -12,7 +12,14 @@ export type JobApplicationCardProps = {
   onClick: () => void;
 };
 
-export function JobApplicationCard({ company, initials, position, status, dateLabel, onClick }: JobApplicationCardProps) {
+export function JobApplicationCard({
+  company,
+  initials,
+  position,
+  status,
+  dateLabel,
+  onClick,
+}: JobApplicationCardProps) {
   const tokens = statusColors[status];
 
   return (

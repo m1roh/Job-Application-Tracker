@@ -8,6 +8,7 @@ import {
   type ApplicationDetailTemplateProps,
 } from "../../../../components/templates/application-detail/application-detail-template";
 import type { NavTab } from "../../../../components/organisms/header-nav/header-nav";
+import { toIsoDateOnly } from "../../../_lib/date-only";
 import { changeApplicationStatusAction, deleteJobApplicationAction, planFollowUpAction } from "../../actions";
 
 const NAV_ROUTES: Record<NavTab, string> = {
@@ -21,7 +22,7 @@ const FOLLOW_UP_DEFAULT_OFFSET_DAYS = 15;
 function defaultFollowUpValue(): string {
   const date = new Date();
   date.setDate(date.getDate() + FOLLOW_UP_DEFAULT_OFFSET_DAYS);
-  return date.toISOString().slice(0, 10);
+  return toIsoDateOnly(date);
 }
 
 export type ApplicationDetailClientProps = Omit<
