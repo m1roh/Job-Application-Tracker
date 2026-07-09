@@ -13,6 +13,10 @@ const meta: Meta<typeof ApplicationDetailPanel> = {
     status: "application_sent",
     applicationDateLabel: "12 juin 2026",
     nextFollowUpLabel: "26 juin 2026",
+    canPlanFollowUp: true,
+    followUpDefaultValue: "2026-07-20",
+    pendingFollowUp: false,
+    onPlanFollowUp: fn(),
     offerUrl: "https://example.com/offres/nova-tech",
     notes: "Contact via une ancienne collègue (Camille). Process en 3 étapes : RH → technique → CEO.",
     history: [
@@ -35,6 +39,7 @@ export const WithoutOfferLink: Story = {
   args: {
     applicationDateLabel: null,
     nextFollowUpLabel: null,
+    canPlanFollowUp: false,
     offerUrl: null,
   },
   play: async ({ canvasElement }) => {
@@ -49,6 +54,7 @@ export const WithoutHistory: Story = {
     status: "to_contact",
     applicationDateLabel: null,
     nextFollowUpLabel: null,
+    canPlanFollowUp: false,
     offerUrl: null,
     notes: "",
     history: [],
@@ -83,16 +89,33 @@ export const Sent: Story = {
 
     await userEvent.click(canvas.getByRole("button", { name: "Entretien RH" }));
     await expect(args.onStatusSelect).toHaveBeenCalledWith("hr_interview");
+
+    await userEvent.click(canvas.getByRole("button", { name: "Planifier" }));
+    await expect(args.onPlanFollowUp).toHaveBeenCalledWith(new Date("2026-07-20T00:00:00.000Z"));
   },
 };
 
 export const TerminalStatusHasNoActions: Story = {
   args: {
     status: "rejected",
+    canPlanFollowUp: false,
     nextStatusActions: [],
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.queryByRole("button")).not.toBeInTheDocument();
+  },
+};
+
+export const CannotPlanFollowUp: Story = {
+  args: {
+    status: "hr_interview",
+    canPlanFollowUp: false,
+    nextFollowUpLabel: null,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.queryByLabelText("Planifier une relance")).not.toBeInTheDocument();
+    await expect(canvas.queryByRole("button", { name: "Planifier" })).not.toBeInTheDocument();
   },
 };

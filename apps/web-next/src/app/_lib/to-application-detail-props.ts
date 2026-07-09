@@ -15,7 +15,10 @@ function assertKnownStatus(status: string): asserts status is StatusKey {
   }
 }
 
-export type ApplicationDetailProps = Omit<ApplicationDetailPanelProps, "pendingStatus" | "onStatusSelect"> & {
+export type ApplicationDetailProps = Omit<
+  ApplicationDetailPanelProps,
+  "pendingStatus" | "onStatusSelect" | "followUpDefaultValue" | "pendingFollowUp" | "onPlanFollowUp"
+> & {
   id: string;
 };
 
@@ -48,6 +51,7 @@ export function toApplicationDetailProps(application: JobApplication): Applicati
     status: application.status,
     applicationDateLabel: application.applicationDate ? formatDate(application.applicationDate) : null,
     nextFollowUpLabel: application.nextFollowUp ? formatDate(application.nextFollowUp) : null,
+    canPlanFollowUp: application.canPlanFollowUp,
     offerUrl: application.offerUrl,
     notes: application.notes,
     history,

@@ -227,6 +227,84 @@ describe("changeApplicationStatusAction", () => {
   });
 });
 
+describe("planFollowUpAction", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.clearAllMocks();
+    replaceOneMock.mockResolvedValue({});
+  });
+
+  afterEach(() => {
+    process.env = { ...originalEnv };
+  });
+
+  const sentDocument = {
+    _id: "9c858901-8a57-4791-81fe-4c455b099bc9",
+    company: "Nova Tech",
+    position: "Dev. Full-Stack",
+    status: "application_sent",
+    applicationDate: new Date("2026-06-12T00:00:00.000Z"),
+    nextFollowUp: null,
+    offerUrl: null,
+    notes: "",
+    history: [],
+  };
+
+  const notSentDocument = {
+    ...sentDocument,
+    status: "to_contact",
+    applicationDate: null,
+  };
+
+  describe("invalid cases", () => {
+    it("returns an error when no application matches the id, without saving anything", async () => {
+      findOneMock.mockResolvedValue(null);
+      const { planFollowUpAction } = await import("./actions");
+
+      const result = await planFollowUpAction(sentDocument._id, new Date("2026-07-10T00:00:00.000Z"));
+
+      expect(result).toHaveProperty("error");
+      expect(replaceOneMock).not.toHaveBeenCalled();
+      expect(revalidatePathMock).not.toHaveBeenCalled();
+    });
+
+    it("returns an error when the current status does not allow planning a follow-up, without saving anything", async () => {
+      findOneMock.mockResolvedValue(notSentDocument);
+      const { planFollowUpAction } = await import("./actions");
+
+      const result = await planFollowUpAction(notSentDocument._id, new Date("2026-07-10T00:00:00.000Z"));
+
+      expect(result).toHaveProperty("error");
+      expect(replaceOneMock).not.toHaveBeenCalled();
+      expect(revalidatePathMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("valid cases", () => {
+    it("saves the follow-up date, revalidates the dashboard and detail page, and returns a formatted label", async () => {
+      findOneMock.mockResolvedValue(sentDocument);
+      const { planFollowUpAction } = await import("./actions");
+
+      const result = await planFollowUpAction(sentDocument._id, new Date("2026-07-10T00:00:00.000Z"));
+
+      expect(result).toEqual({ nextFollowUpLabel: "10 juillet 2026" });
+      expect(replaceOneMock).toHaveBeenCalledOnce();
+      expect(revalidatePathMock).toHaveBeenCalledWith("/");
+      expect(revalidatePathMock).toHaveBeenCalledWith(`/candidatures/${sentDocument._id}`);
+    });
+
+    it("falls back to a generic message when something other than an Error is thrown", async () => {
+      findOneMock.mockResolvedValue(sentDocument);
+      replaceOneMock.mockRejectedValueOnce("a non-Error rejection");
+      const { planFollowUpAction } = await import("./actions");
+
+      const result = await planFollowUpAction(sentDocument._id, new Date("2026-07-10T00:00:00.000Z"));
+
+      expect(result).toEqual({ error: "Une erreur est survenue." });
+    });
+  });
+});
+
 describe("getJobApplicationAction", () => {
   beforeEach(() => {
     vi.resetModules();

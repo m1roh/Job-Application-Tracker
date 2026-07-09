@@ -59,6 +59,10 @@
   color: var(--color-text-primary);
 }
 
+.followUpPicker {
+  margin-top: 8px;
+}
+
 .metaLink {
   font-size: 14px;
   font-weight: 600;

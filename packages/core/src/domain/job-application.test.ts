@@ -165,6 +165,40 @@ describe("JobApplication", () => {
 
       expect(application.history.map((entry) => entry.newStatus)).toEqual(["application_sent", "hr_interview"]);
     });
+
+    it("sets applicationDate to the transition date on the first move to application_sent", () => {
+      const application = JobApplication.create(createParams(), NOW);
+
+      const updated = application.changeStatus("application_sent", NOW);
+
+      expect(updated.applicationDate).toEqual(NOW);
+    });
+
+    it("sets applicationDate when moving to application_sent from offer_open", () => {
+      const offerOpen = moveTo("offer_open");
+
+      const updated = offerOpen.changeStatus("application_sent", NOW);
+
+      expect(updated.applicationDate).toEqual(NOW);
+    });
+
+    it("does not overwrite an existing applicationDate when resuming to application_sent after on_hold", () => {
+      const sent = moveTo("application_sent");
+      const paused = sent.changeStatus("on_hold", NOW);
+      const laterNow = new Date("2026-07-20T00:00:00.000Z");
+
+      const resumed = paused.changeStatus("application_sent", laterNow);
+
+      expect(resumed.applicationDate).toEqual(NOW);
+    });
+
+    it("leaves applicationDate null for a transition that does not move to application_sent", () => {
+      const application = JobApplication.create(createParams(), NOW);
+
+      const updated = application.changeStatus("offer_open", NOW);
+
+      expect(updated.applicationDate).toBeNull();
+    });
   });
 
   describe("planFollowUp (invalid cases)", () => {
@@ -197,6 +231,39 @@ describe("JobApplication", () => {
 
       expect(updated.nextFollowUp).toEqual(followUpDate);
     });
+  });
+
+  describe("canPlanFollowUp", () => {
+    it("is true when status is application_sent", () => {
+      const application = moveTo("application_sent");
+
+      expect(application.canPlanFollowUp).toBe(true);
+    });
+
+    it("is true when status is follow_up_sent", () => {
+      const application = moveTo("follow_up_sent");
+
+      expect(application.canPlanFollowUp).toBe(true);
+    });
+
+    const disallowedStatuses: ApplicationStatus[] = [
+      "to_contact",
+      "offer_open",
+      "hr_interview",
+      "technical_interview",
+      "offer_received",
+      "rejected",
+      "withdrawn",
+      "on_hold",
+    ];
+
+    for (const status of disallowedStatuses) {
+      it(`is false when status is ${status}`, () => {
+        const application = moveTo(status);
+
+        expect(application.canPlanFollowUp).toBe(false);
+      });
+    }
   });
 
   describe("allowedNextStatuses", () => {

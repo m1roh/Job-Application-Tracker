@@ -1,6 +1,7 @@
 import { statusColors, type StatusKey } from "@job-tracker/design-tokens";
 import { CompanyAvatar } from "../../atoms/company-avatar/company-avatar";
 import { StatusBadge } from "../../molecules/status-badge/status-badge";
+import { FollowUpPicker } from "../follow-up-picker/follow-up-picker";
 import { StatusActions, type StatusActionItem } from "../status-actions/status-actions";
 import styles from "./application-detail-panel.module.css";
 
@@ -17,6 +18,10 @@ export type ApplicationDetailPanelProps = {
   status: StatusKey;
   applicationDateLabel: string | null;
   nextFollowUpLabel: string | null;
+  canPlanFollowUp: boolean;
+  followUpDefaultValue: string;
+  pendingFollowUp: boolean;
+  onPlanFollowUp: (date: Date) => void;
   offerUrl: string | null;
   notes: string;
   history: HistoryEntry[];
@@ -32,6 +37,10 @@ export function ApplicationDetailPanel({
   status,
   applicationDateLabel,
   nextFollowUpLabel,
+  canPlanFollowUp,
+  followUpDefaultValue,
+  pendingFollowUp,
+  onPlanFollowUp,
   offerUrl,
   notes,
   history,
@@ -67,6 +76,11 @@ export function ApplicationDetailPanel({
           <div>
             <div className={styles.metaLabel}>Prochaine relance</div>
             <div className={styles.metaValue}>{nextFollowUpLabel ?? "—"}</div>
+            {canPlanFollowUp ? (
+              <div className={styles.followUpPicker}>
+                <FollowUpPicker defaultValue={followUpDefaultValue} pending={pendingFollowUp} onSubmit={onPlanFollowUp} />
+              </div>
+            ) : null}
           </div>
           <div>
             <div className={styles.metaLabel}>Lien de l&apos;offre</div>

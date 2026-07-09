@@ -97,6 +97,16 @@ describe("toApplicationDetailProps", () => {
     expect(result.nextFollowUpLabel).toBe("26 juin 2026");
   });
 
+  it("exposes canPlanFollowUp true when status is application_sent", () => {
+    const application = buildApplication({ status: "application_sent" });
+    expect(toApplicationDetailProps(application).canPlanFollowUp).toBe(true);
+  });
+
+  it("exposes canPlanFollowUp false when status does not allow a follow-up", () => {
+    const application = buildApplication({ status: "to_contact" });
+    expect(toApplicationDetailProps(application).canPlanFollowUp).toBe(false);
+  });
+
   it("passes offerUrl and notes through as-is", () => {
     const application = buildApplication({ offerUrl: "https://example.com/offer", notes: "Contact via Camille" });
     const result = toApplicationDetailProps(application);

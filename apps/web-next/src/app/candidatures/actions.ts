@@ -5,10 +5,12 @@ import { ChangeApplicationStatusUseCase } from "@job-tracker/core/application/us
 import { CreateJobApplicationUseCase } from "@job-tracker/core/application/use-cases/create-job-application";
 import { GetJobApplicationUseCase } from "@job-tracker/core/application/use-cases/get-job-application";
 import { ListJobApplicationsUseCase } from "@job-tracker/core/application/use-cases/list-job-applications";
+import { PlanFollowUpUseCase } from "@job-tracker/core/application/use-cases/plan-follow-up";
 import type { ApplicationStatus, JobApplication } from "@job-tracker/core/domain/job-application";
 import { JobApplicationId } from "@job-tracker/core/domain/value-objects/job-application-id";
 import { MongoJobApplicationRepository } from "@job-tracker/infrastructure/repositories/job-application-repository.mongodb";
 import { SystemClock } from "@job-tracker/infrastructure/services/clock.impl";
+import { formatDate } from "../_lib/format-date";
 import { getJobApplicationsCollection } from "../../server/mongodb";
 
 export async function listJobApplicationsAction(): Promise<JobApplication[]> {
@@ -68,6 +70,25 @@ export async function changeApplicationStatusAction(
     revalidatePath(`/candidatures/${id}`);
 
     return { status: application.status };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Une erreur est survenue." };
+  }
+}
+
+export type PlanFollowUpResult = { nextFollowUpLabel: string } | { error: string };
+
+export async function planFollowUpAction(id: string, date: Date): Promise<PlanFollowUpResult> {
+  try {
+    const collection = await getJobApplicationsCollection();
+    const repository = new MongoJobApplicationRepository(collection);
+    const useCase = new PlanFollowUpUseCase(repository);
+
+    const application = await useCase.execute(JobApplicationId.from(id), date);
+
+    revalidatePath("/");
+    revalidatePath(`/candidatures/${id}`);
+
+    return { nextFollowUpLabel: formatDate(application.nextFollowUp!) };
   } catch (error) {
     return { error: error instanceof Error ? error.message : "Une erreur est survenue." };
   }

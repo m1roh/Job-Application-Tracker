@@ -120,6 +120,8 @@ export class JobApplication {
       status: newStatus,
       history: [...this.props.history, change],
       nextFollowUp: STATUSES_ALLOWING_FOLLOW_UP.includes(newStatus) ? this.props.nextFollowUp : null,
+      applicationDate:
+        newStatus === "application_sent" && this.props.applicationDate === null ? now : this.props.applicationDate,
     });
   }
 
@@ -153,6 +155,10 @@ export class JobApplication {
 
   get nextFollowUp(): Date | null {
     return this.props.nextFollowUp;
+  }
+
+  get canPlanFollowUp(): boolean {
+    return STATUSES_ALLOWING_FOLLOW_UP.includes(this.props.status);
   }
 
   get offerUrl(): string | null {
