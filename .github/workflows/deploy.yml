@@ -22,8 +22,39 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Ensure external "edge" network exists
+        run: docker network create edge 2>/dev/null || true
+
       - name: Deploy edge (Caddy + DDNS) and prod stack
         run: docker compose -f docker-compose.edge.yml -f docker-compose.prod.yml up -d --build
+
+      - name: Wait for prod containers to be healthy
+        shell: bash
+        run: |
+          set -e
+          services="mongo-prod api-nest-prod web-next-prod"
+          for i in $(seq 1 12); do
+            unhealthy=""
+            for s in $services; do
+              cid=$(docker compose -f docker-compose.edge.yml -f docker-compose.prod.yml ps -q "$s")
+              health_status=$(docker inspect --format='{{.State.Health.Status}}' "$cid" 2>/dev/null || echo "unknown")
+              if [ "$health_status" != "healthy" ]; then
+                unhealthy="$unhealthy $s($health_status)"
+              fi
+            done
+            if [ -z "$unhealthy" ]; then
+              echo "All prod services healthy"
+              exit 0
+            fi
+            echo "Waiting for:$unhealthy ..."
+            sleep 5
+          done
+          echo "Timed out waiting for prod services to become healthy"
+          for s in $services; do
+            echo "=== logs: $s ==="
+            docker compose -f docker-compose.edge.yml -f docker-compose.prod.yml logs "$s" --tail=100
+          done
+          exit 1
 
   deploy-dev:
     if: github.ref == 'refs/heads/develop'
@@ -38,5 +69,36 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Ensure external "edge" network exists
+        run: docker network create edge 2>/dev/null || true
+
       - name: Deploy dev stack
         run: docker compose -f docker-compose.dev.yml up -d --build
+
+      - name: Wait for dev containers to be healthy
+        shell: bash
+        run: |
+          set -e
+          services="mongo-dev api-nest-dev web-next-dev"
+          for i in $(seq 1 12); do
+            unhealthy=""
+            for s in $services; do
+              cid=$(docker compose -f docker-compose.dev.yml ps -q "$s")
+              health_status=$(docker inspect --format='{{.State.Health.Status}}' "$cid" 2>/dev/null || echo "unknown")
+              if [ "$health_status" != "healthy" ]; then
+                unhealthy="$unhealthy $s($health_status)"
+              fi
+            done
+            if [ -z "$unhealthy" ]; then
+              echo "All dev services healthy"
+              exit 0
+            fi
+            echo "Waiting for:$unhealthy ..."
+            sleep 5
+          done
+          echo "Timed out waiting for dev services to become healthy"
+          for s in $services; do
+            echo "=== logs: $s ==="
+            docker compose -f docker-compose.dev.yml logs "$s" --tail=100
+          done
+          exit 1

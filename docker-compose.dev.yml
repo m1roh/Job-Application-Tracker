@@ -9,6 +9,12 @@ services:
       - mongo-dev-data:/data/db
     networks:
       - dev-internal
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   api-nest-dev:
     build:
@@ -16,7 +22,8 @@ services:
       dockerfile: apps/api-nest/Dockerfile
     restart: unless-stopped
     depends_on:
-      - mongo-dev
+      mongo-dev:
+        condition: service_healthy
     environment:
       MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo-dev:27017/?authSource=admin
       MONGODB_DB_NAME: ${MONGODB_DB_NAME}
@@ -33,7 +40,8 @@ services:
       dockerfile: apps/web-next/Dockerfile
     restart: unless-stopped
     depends_on:
-      - mongo-dev
+      mongo-dev:
+        condition: service_healthy
     environment:
       MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo-dev:27017/?authSource=admin
       MONGODB_DB_NAME: ${MONGODB_DB_NAME}
