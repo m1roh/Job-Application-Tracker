@@ -8,6 +8,7 @@
     "./*": "./src/*"
   },
   "scripts": {
-    "build": "tsc --noEmit"
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
   }
 }

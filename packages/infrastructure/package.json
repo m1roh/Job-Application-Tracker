@@ -11,7 +11,8 @@
     "mongodb": "^7.4.0"
   },
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "mongodb-memory-server": "^11.2.0"

@@ -30,7 +30,9 @@ const NOT_FOUND_MESSAGE_PREFIX = "No job application found";
 function toHttpException(error: unknown): BadRequestException | NotFoundException {
   const message = error instanceof Error ? error.message : "Unexpected error";
 
-  return message.startsWith(NOT_FOUND_MESSAGE_PREFIX) ? new NotFoundException(message) : new BadRequestException(message);
+  return message.startsWith(NOT_FOUND_MESSAGE_PREFIX)
+    ? new NotFoundException(message)
+    : new BadRequestException(message);
 }
 
 function parseId(id: string): JobApplicationId {

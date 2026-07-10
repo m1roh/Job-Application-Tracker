@@ -1,0 +1,30 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      - edge
+
+  cloudflare-ddns:
+    image: favonia/cloudflare-ddns:1
+    restart: unless-stopped
+    environment:
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
+      DOMAINS: ${CLOUDFLARE_DOMAINS}
+      PROXIED: "false"
+      IP6_PROVIDER: none
+
+networks:
+  edge:
+    name: edge
+
+volumes:
+  caddy-data:
+  caddy-config:

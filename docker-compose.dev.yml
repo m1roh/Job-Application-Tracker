@@ -1,0 +1,64 @@
+services:
+  mongo-dev:
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    volumes:
+      - mongo-dev-data:/data/db
+    networks:
+      - dev-internal
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  api-nest-dev:
+    build:
+      context: .
+      dockerfile: apps/api-nest/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      mongo-dev:
+        condition: service_healthy
+    environment:
+      MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo-dev:27017/?authSource=admin
+      MONGODB_DB_NAME: ${MONGODB_DB_NAME}
+      PORT: 4000
+      WEB_ANGULAR_ORIGIN: ${WEB_ANGULAR_ORIGIN}
+      NODE_ENV: development
+    networks:
+      - edge
+      - dev-internal
+
+  web-next-dev:
+    build:
+      context: .
+      dockerfile: apps/web-next/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      mongo-dev:
+        condition: service_healthy
+    environment:
+      MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo-dev:27017/?authSource=admin
+      MONGODB_DB_NAME: ${MONGODB_DB_NAME}
+      NODE_ENV: production
+      PORT: 3000
+    networks:
+      - edge
+      - dev-internal
+
+  # web-angular-dev : pas encore de code applicatif (apps/web-angular/src est vide, cf. README "Angular à venir").
+  # À activer une fois l'app démarrée : Dockerfile + service ici + route dans infra/Caddyfile
+  # (dev.ng-job-app-tracker.romainh-craft.com, actuellement commentée).
+
+networks:
+  edge:
+    external: true
+  dev-internal:
+
+volumes:
+  mongo-dev-data:

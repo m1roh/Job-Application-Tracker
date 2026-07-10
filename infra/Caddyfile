@@ -1,0 +1,36 @@
+# Reverse proxy pour les deux environnements (prod + dev) de romainh-craft.com.
+# Caddy gère automatiquement le TLS (Let's Encrypt) pour chaque bloc ci-dessous.
+# Les noms utilisés en reverse_proxy (ex. web-next-prod:3000) sont les noms des
+# services Docker Compose du même réseau `edge` — résolus par le DNS interne Docker.
+
+# --- Prod ---
+
+next-job-app-tracker.romainh-craft.com {
+    reverse_proxy web-next-prod:3000
+}
+
+api-job-app-tracker.romainh-craft.com {
+    reverse_proxy api-nest-prod:4000
+}
+
+# --- Dev ---
+
+dev.next-job-app-tracker.romainh-craft.com {
+    reverse_proxy web-next-dev:3000
+}
+
+dev.api-job-app-tracker.romainh-craft.com {
+    reverse_proxy api-nest-dev:4000
+}
+
+# --- web-angular : pas encore de code applicatif (apps/web-angular/src est vide,
+# cf. README "Angular à venir"). À décommenter une fois l'app démarrée, son
+# Dockerfile écrit et son service ajouté à docker-compose.prod.yml / .dev.yml.
+
+# ng-job-app-tracker.romainh-craft.com {
+#     reverse_proxy web-angular-prod:80
+# }
+
+# dev.ng-job-app-tracker.romainh-craft.com {
+#     reverse_proxy web-angular-dev:80
+# }

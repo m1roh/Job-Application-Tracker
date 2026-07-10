@@ -1,0 +1,64 @@
+services:
+  mongo-prod:
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    volumes:
+      - mongo-prod-data:/data/db
+    networks:
+      - prod-internal
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  api-nest-prod:
+    build:
+      context: .
+      dockerfile: apps/api-nest/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      mongo-prod:
+        condition: service_healthy
+    environment:
+      MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo-prod:27017/?authSource=admin
+      MONGODB_DB_NAME: ${MONGODB_DB_NAME}
+      PORT: 4000
+      WEB_ANGULAR_ORIGIN: ${WEB_ANGULAR_ORIGIN}
+      NODE_ENV: production
+    networks:
+      - edge
+      - prod-internal
+
+  web-next-prod:
+    build:
+      context: .
+      dockerfile: apps/web-next/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      mongo-prod:
+        condition: service_healthy
+    environment:
+      MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo-prod:27017/?authSource=admin
+      MONGODB_DB_NAME: ${MONGODB_DB_NAME}
+      NODE_ENV: production
+      PORT: 3000
+    networks:
+      - edge
+      - prod-internal
+
+  # web-angular-prod : pas encore de code applicatif (apps/web-angular/src est vide, cf. README "Angular à venir").
+  # À activer une fois l'app démarrée : Dockerfile + service ici + route dans infra/Caddyfile
+  # (ng-job-app-tracker.romainh-craft.com, actuellement commentée).
+
+networks:
+  edge:
+    external: true
+  prod-internal:
+
+volumes:
+  mongo-prod-data:
