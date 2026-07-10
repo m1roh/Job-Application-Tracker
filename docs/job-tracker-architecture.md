@@ -521,6 +521,8 @@ Le DDNS est un unique conteneur partagé (déployé avec l'Environment `producti
 
 Dans GitHub : **Settings → Actions → Runners → New self-hosted runner**, suivre les instructions pour ton OS. Le runner s'installe comme un service qui interroge GitHub en continu (sortant uniquement — aucun port entrant à ouvrir pour ça).
 
+**Label obligatoire par environnement** : `deploy-prod` cible `runs-on: [self-hosted, prod]` et `deploy-dev` cible `runs-on: [self-hosted, dev]`. Enregistrer chaque runner avec le label correspondant (`--labels self-hosted,dev` pour le runner de la VM dev, `--labels self-hosted,prod` pour celui de la VM prod). Sans cette distinction, `runs-on: self-hosted` seul matche n'importe quel runner du repo — un runner dev peut alors hériter d'un job `deploy-prod` en attente et déployer la stack prod (Caddy, DDNS Cloudflare) sur la mauvaise machine.
+
 ### DNS : domaine chez amen.fr, gestion déléguée à Cloudflare
 
 Le domaine `romainh-craft.com` reste **enregistré chez amen.fr** — seule la gestion DNS est déléguée à **Cloudflare (plan Free, gratuit)** en changeant les serveurs de noms côté amen.fr. Les 6 sous-domaines restent en mode **"DNS only"** (non proxifiés) pour ne pas interférer avec le renouvellement automatique Let's Encrypt de Caddy (le mode proxifié intercepterait le challenge HTTP-01). Le conteneur `cloudflare-ddns` (image `favonia/cloudflare-ddns`, maintenue) garde les 6 enregistrements A à jour automatiquement, vu que l'IP publique du home server n'est probablement pas fixe.

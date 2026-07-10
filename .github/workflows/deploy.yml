@@ -9,7 +9,7 @@ on:
 jobs:
   deploy-prod:
     if: github.ref == 'refs/heads/main'
-    runs-on: self-hosted
+    runs-on: [self-hosted, prod]
     environment: production
     env:
       MONGO_ROOT_USERNAME: ${{ secrets.MONGO_ROOT_USERNAME }}
@@ -58,7 +58,7 @@ jobs:
 
   deploy-dev:
     if: github.ref == 'refs/heads/develop'
-    runs-on: self-hosted
+    runs-on: [self-hosted, dev]
     environment: development
     env:
       MONGO_ROOT_USERNAME: ${{ secrets.MONGO_ROOT_USERNAME }}
