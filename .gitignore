@@ -13,6 +13,7 @@ playwright/.cache/
 .env
 .env.*
 !.env.example
+!.env.*.example
 
 .idea/
 .DS_Store

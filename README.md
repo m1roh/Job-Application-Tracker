@@ -60,6 +60,17 @@ apps/
 - ✅ Phase A (domaine, use cases, adapters) terminée en TDD.
 - 🚧 Phase B en cours : Next.js (design tokens, Storybook, atomic design) démarré ; NestJS/Angular à venir.
 
+## CI/CD
+
+Toute contribution passe par une PR vers `main` (push direct bloqué, `ci.yml` doit être vert). Deux environnements déployés sur le home server, chacun avec sa propre base MongoDB isolée :
+
+|          | Branche   | web-next                                   | api-nest                                  | web-angular                              |
+| -------- | --------- | ------------------------------------------ | ----------------------------------------- | ---------------------------------------- |
+| **Prod** | `main`    | next-job-app-tracker.romainh-craft.com     | api-job-app-tracker.romainh-craft.com     | ng-job-app-tracker.romainh-craft.com     |
+| **Dev**  | `develop` | dev.next-job-app-tracker.romainh-craft.com | dev.api-job-app-tracker.romainh-craft.com | dev.ng-job-app-tracker.romainh-craft.com |
+
+`web-angular` n'a pas encore de code applicatif — ses routes/services de déploiement existent déjà mais restent commentés jusqu'à son démarrage en Phase B. Détail complet (runner self-hosted, DNS Cloudflare, secrets par Environment) dans [`docs/job-tracker-architecture.md`](docs/job-tracker-architecture.md), section 13.
+
 ## Hors scope (MVP)
 
 Pas d'authentification, pas de multi-utilisateur, pas de champ `userId` anticipé. Le point d'extension existe déjà via le pattern port/adapter — pas besoin de le préparer avant d'en avoir besoin.

@@ -463,35 +463,67 @@ Pas d'authentification, pas de gestion de rôles — hors scope MVP (décidé en
 
 Deux workflows séparés, avec des runners différents et des déclencheurs différents — c'est la décision de sécurité la plus importante de cette section.
 
-| Workflow     | Déclencheur                                           | Runner                          | Rôle                                   |
-| ------------ | ----------------------------------------------------- | ------------------------------- | -------------------------------------- |
-| `ci.yml`     | `push` (toutes branches) + `pull_request` vers `main` | GitHub-hosted (`ubuntu-latest`) | Lint, format, typecheck, tests, build  |
-| `deploy.yml` | `push` sur `main` uniquement                          | **Self-hosted** (home server)   | Build des images Docker et déploiement |
+| Workflow     | Déclencheur                                           | Runner                          | Rôle                                                             |
+| ------------ | ----------------------------------------------------- | ------------------------------- | ---------------------------------------------------------------- |
+| `ci.yml`     | `push` (toutes branches) + `pull_request` vers `main` | GitHub-hosted (`ubuntu-latest`) | Lint, format, typecheck, tests, audit, build                     |
+| `deploy.yml` | `push` sur `main` (prod) ou `develop` (dev)           | **Self-hosted** (home server)   | Build des images Docker et déploiement, un job par environnement |
 
-**Règle de sécurité non négociable** : le runner self-hosted ne se déclenche jamais sur `pull_request`. Un repo public avec un runner self-hosted exposé aux PR permettrait à n'importe qui d'exécuter du code sur le réseau domestique via une PR malveillante. Le déploiement se déclenche uniquement après un `push` direct sur `main` — donc après qu'une PR a déjà été relue et mergée par toi.
+**Règle de sécurité non négociable** : le runner self-hosted ne se déclenche jamais sur `pull_request`. Un repo public avec un runner self-hosted exposé aux PR permettrait à n'importe qui d'exécuter du code sur le réseau domestique via une PR malveillante. Le déploiement se déclenche uniquement après un `push` direct sur `main` ou `develop` — donc après qu'une PR a déjà été relue et mergée.
+
+**Toute contribution passe par une PR** : `main` est protégée côté GitHub (PR obligatoire, `ci.yml` doit être vert avant de merger, push direct bloqué). Pas d'exigence de review approuvée — le repo est solo.
+
+### Deux environnements : dev et prod
+
+|          | Branche   | Domaine web-next                             | Domaine api-nest                            | Domaine web-angular                        | Base MongoDB                                   |
+| -------- | --------- | -------------------------------------------- | ------------------------------------------- | ------------------------------------------ | ---------------------------------------------- |
+| **Prod** | `main`    | `next-job-app-tracker.romainh-craft.com`     | `api-job-app-tracker.romainh-craft.com`     | `ng-job-app-tracker.romainh-craft.com`     | conteneur `mongo-prod`, réseau `prod-internal` |
+| **Dev**  | `develop` | `dev.next-job-app-tracker.romainh-craft.com` | `dev.api-job-app-tracker.romainh-craft.com` | `dev.ng-job-app-tracker.romainh-craft.com` | conteneur `mongo-dev`, réseau `dev-internal`   |
+
+Les deux environnements tournent sur le **même home server**, isolés l'un de l'autre par des réseaux Docker internes distincts (`prod-internal` / `dev-internal`) — la base de dev ne peut pas atteindre la base de prod et inversement. Un unique réseau `edge` (partagé) relie Caddy à tous les conteneurs d'apps des deux environnements pour le reverse proxy.
+
+`web-angular` n'a pas encore de code applicatif (`apps/web-angular/src` est vide) — ses services Docker Compose et ses blocs Caddy existent déjà mais sont **commentés**, à activer quand l'app démarrera en Phase B.
 
 ### CI (`ci.yml`) — sur GitHub-hosted runners
 
 1. Checkout + setup pnpm avec cache
 2. `pnpm install --frozen-lockfile`
-3. Lint : `pnpm -r lint` (ESLint)
-4. Format : `pnpm -r format:check` (Prettier, échoue si non formaté)
-5. Typecheck : `pnpm -r typecheck` (`tsc --noEmit` par package)
-6. Tests : `pnpm -r test` — fonctionne dès maintenant grâce aux scripts placeholder (`echo "no tests yet" && exit 0`), se remplit automatiquement à mesure que les vrais tests s'ajoutent en TDD
+3. Lint : `pnpm lint` (ESLint)
+4. Format : `pnpm format:check` (Prettier, échoue si non formaté)
+5. Typecheck : `pnpm typecheck` (`pnpm -r --if-present run typecheck`, `tsc --noEmit` par package)
+6. Tests : `pnpm test`
 7. Audit sécurité : `pnpm audit --audit-level=high` (cf. section 10)
-8. Build : `pnpm -r build` (une fois les scripts de build réels en place, à partir de la Phase B)
+8. Build : `pnpm build` (`pnpm -r --if-present run build`)
 
 ### CD (`deploy.yml`) — sur le runner self-hosted
 
-1. Checkout
-2. `docker compose build` — les Dockerfiles de chaque app vivent dans leur dossier (`apps/web-next/Dockerfile`, etc.)
-3. `docker compose up -d` — redémarre les conteneurs avec les nouvelles images
+Deux jobs, chacun gated par un [Environment GitHub](https://docs.github.com/actions/deployment/targeting-different-environments/using-environments-for-deployment) qui porte ses propres secrets :
 
-Pas besoin de registre d'images (ghcr.io) : le runner tourne déjà sur la machine cible, construire et déployer sont la même étape.
+- **`deploy-prod`** (`if: github.ref == 'refs/heads/main'`, `environment: production`) : `docker compose -f docker-compose.edge.yml -f docker-compose.prod.yml up -d --build` — démarre/maintient à jour Caddy + le DDNS Cloudflare (infra partagée) **et** la stack prod.
+- **`deploy-dev`** (`if: github.ref == 'refs/heads/develop'`, `environment: development`) : `docker compose -f docker-compose.dev.yml up -d --build` — ne touche que la stack dev, suppose que le réseau `edge` existe déjà (créé par `deploy-prod`).
+
+**Piège de séquencement** : au tout premier déploiement, il faut pousser sur `main` avant `develop` (ou démarrer `docker-compose.edge.yml` manuellement sur le serveur), sinon `deploy-dev` échoue faute de réseau `edge`.
+
+Pas de registre d'images (ghcr.io) : le runner tourne déjà sur la machine cible, construire et déployer sont la même étape.
+
+### Secrets par Environment GitHub
+
+| Secret                                        | `production`                               | `development`                 | Consommé par                                              |
+| --------------------------------------------- | ------------------------------------------ | ----------------------------- | --------------------------------------------------------- |
+| `MONGO_ROOT_USERNAME` / `MONGO_ROOT_PASSWORD` | ✅ (valeurs prod)                          | ✅ (valeurs dev, différentes) | `mongo-prod` / `mongo-dev`, construction de `MONGODB_URI` |
+| `MONGODB_DB_NAME`                             | ✅                                         | ✅                            | `api-nest-*`, `web-next-*`                                |
+| `WEB_ANGULAR_ORIGIN`                          | ✅                                         | ✅                            | CORS `api-nest-*`                                         |
+| `CLOUDFLARE_API_TOKEN`                        | ✅ (scope Zone.DNS Edit)                   | —                             | conteneur `cloudflare-ddns`                               |
+| `CLOUDFLARE_DOMAINS`                          | ✅ (liste les 6 sous-domaines, prod + dev) | —                             | conteneur `cloudflare-ddns`                               |
+
+Le DDNS est un unique conteneur partagé (déployé avec l'Environment `production`), pas besoin de le dupliquer par environnement.
 
 ### Installer le runner self-hosted
 
 Dans GitHub : **Settings → Actions → Runners → New self-hosted runner**, suivre les instructions pour ton OS. Le runner s'installe comme un service qui interroge GitHub en continu (sortant uniquement — aucun port entrant à ouvrir pour ça).
+
+### DNS : domaine chez amen.fr, gestion déléguée à Cloudflare
+
+Le domaine `romainh-craft.com` reste **enregistré chez amen.fr** — seule la gestion DNS est déléguée à **Cloudflare (plan Free, gratuit)** en changeant les serveurs de noms côté amen.fr. Les 6 sous-domaines restent en mode **"DNS only"** (non proxifiés) pour ne pas interférer avec le renouvellement automatique Let's Encrypt de Caddy (le mode proxifié intercepterait le challenge HTTP-01). Le conteneur `cloudflare-ddns` (image `favonia/cloudflare-ddns`, maintenue) garde les 6 enregistrements A à jour automatiquement, vu que l'IP publique du home server n'est probablement pas fixe.
 
 ### Architecture réseau du home server
 
@@ -499,31 +531,31 @@ Dans GitHub : **Settings → Actions → Runners → New self-hosted runner**, s
 Internet
    │
    ▼
-Routeur (port forward 443 → Caddy uniquement)
+Routeur (port forward 443 + 80 → Caddy uniquement)
    │
    ▼
-Caddy (reverse proxy, TLS automatique via Let's Encrypt)
+Caddy (reverse proxy, TLS automatique via Let's Encrypt, réseau `edge`)
    │
-   ├──► web-next (conteneur, port interne uniquement)
-   ├──► api-nest (conteneur, port interne uniquement)
-   ├──► web-angular (conteneur, fichiers statiques, port interne uniquement)
-   └──► MongoDB (conteneur, JAMAIS exposé au routeur, réseau Docker interne uniquement)
+   ├──► web-next-prod / api-nest-prod   (réseaux edge + prod-internal)
+   ├──► web-next-dev  / api-nest-dev    (réseaux edge + dev-internal)
+   ├──► mongo-prod   (réseau prod-internal uniquement, jamais sur edge)
+   └──► mongo-dev    (réseau dev-internal uniquement, jamais sur edge)
 ```
 
 **Règles de sécurité pour l'exposition publique (prolongement direct de la section 10) :**
 
-- Seul le port 443 (HTTPS) est redirigé sur le routeur — vers Caddy, rien d'autre
-- MongoDB reste sur le réseau Docker interne, jamais accessible depuis l'extérieur, même indirectement
+- Seuls les ports 443 (HTTPS) et 80 (challenge ACME HTTP-01) sont redirigés sur le routeur — vers Caddy, rien d'autre
+- MongoDB (prod et dev) reste sur son réseau Docker interne respectif, jamais accessible depuis l'extérieur ni depuis l'autre environnement
 - Caddy gère la terminaison TLS automatiquement (certificat Let's Encrypt, renouvellement automatique)
-- Un nom de domaine est nécessaire — si ton IP publique change (pas d'IP fixe chez la plupart des FAI grand public), un service de DNS dynamique (Cloudflare + un client DDNS, ou DuckDNS) est nécessaire pour que le domaine pointe toujours vers ta box
-- Optionnel mais recommandé : passer par Cloudflare en mode proxy (masque ton IP domestique réelle, ajoute une protection anti-DDoS de base)
 
 ### Ce qui reste à faire de ton côté avant que `deploy.yml` fonctionne
 
-- Un nom de domaine (ou sous-domaine) pointant vers ton IP publique
-- Le port 443 redirigé sur ton routeur vers le home server
-- Le runner self-hosted installé et actif
-- Les `Dockerfile` de chaque app (à écrire en Phase B, une fois le code des apps réel — pas avant)
+- Créer la zone Cloudflare pour `romainh-craft.com` et basculer les serveurs de noms côté amen.fr
+- Créer un token API Cloudflare (scope Zone.DNS Edit) pour le secret `CLOUDFLARE_API_TOKEN`
+- Installer Docker + Docker Compose sur le home server
+- Installer et enregistrer le runner self-hosted GitHub
+- Rediriger les ports 443 et 80 sur le routeur vers le home server
+- Le `Dockerfile` de `web-angular` (à écrire en Phase B, une fois le code de l'app réel — pas avant)
 
 ### Hors scope pour l'instant
 
